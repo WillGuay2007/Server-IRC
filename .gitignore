@@ -1,0 +1,7 @@
+build/**
+Deployment/**
+nob.exe
+nob.pdb
+*.old
+*.zip
+Tools/w64devkit
