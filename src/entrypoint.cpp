@@ -1,8 +1,25 @@
 #include "entrypoint.h"
+#include "raylib.h"
+#include "rlImGui.h"
+#include "imgui.h"
 
-//Creer votre class Engin ici et appeler une fonction start que vous définisser à la classe dans la fonction raylib_start plus bas.
-void raylib_start(void){
-    // Example:
-    // Engine eng = Engine();
-    // eng.start();
+void raylib_start(void)
+{
+    InitWindow(800, 600, "Raylib + ImGui");
+    SetTargetFPS(60);
+
+    rlImGuiSetup(true);
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(DARKGRAY);
+
+        DrawText("Hello", 20, 20, 20, RAYWHITE);
+
+        EndDrawing();
+    }
+
+    rlImGuiShutdown();
+    CloseWindow();
 }
