@@ -3,12 +3,12 @@
 #include <winsock2.h>
 #include <iostream>
 
+class ClientSocket;
+
 class ISocket {
 public:
-    virtual void Connect() = 0;
-    virtual void Send(SOCKET targetedSocket, char* buffer, int buffersize) = 0;
-    virtual void WaitForResponse(SOCKET targetedSocket, char* buffer, int bufferSize) = 0;
-    virtual void Close() = 0;
+    virtual void Send(const char* buffer, int buffersize) = 0;
+    virtual void WaitForResponse(char* buffer, int buffersize) = 0;
 };
 
 class Socket : public ISocket {
@@ -17,26 +17,28 @@ protected:
     sockaddr_in currentAddress;
 
 public:
-    void Close() override;
-    void Send(SOCKET targetedSocket, char* buffer, int buffersize) override;
-    void WaitForResponse(SOCKET targetedSocket, char* buffer, int bufferSize) override;
+    void Send(const char* buffer, int buffersize) override;
+    void WaitForResponse(char* buffer, int buffersize) override;
     Socket(int address);
+    Socket(SOCKET socket);
     virtual ~Socket();
 };
 
 class ServerSocket : public Socket {
 public:
     ServerSocket(int address);
+    ServerSocket(SOCKET socket);
 
-    SOCKET WaitForConnection();
-    void Connect() override;
+    ClientSocket WaitForConnection();
+    void StartListening();
 };
 
 class ClientSocket : public Socket {
 public:
     ClientSocket(int address);
+    ClientSocket(SOCKET socket);
 
-    void Connect() override;
+    void Connect();
 };
 
 void PrintHello();

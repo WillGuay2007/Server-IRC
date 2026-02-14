@@ -9,24 +9,29 @@ currentSocket = socket(AF_INET, SOCK_STREAM, 0);
     currentAddress = addr;
 }
 
-Socket::~Socket() {}
-void Socket::Close() {
+Socket::~Socket() {
     closesocket(currentSocket);
 }
 
-void Socket::Send(SOCKET targetedSocket, char* buffer, int buffersize) {
-    if (send(targetedSocket, buffer, buffersize, 0) == SOCKET_ERROR) {
+
+void Socket::Send(const char* buffer, int buffersize) {
+    if (send(currentSocket, buffer, buffersize, 0) == SOCKET_ERROR) {
         std::cout << "SOCKET SEND ERROR\n";
     };
 }
 
-void Socket::WaitForResponse(SOCKET desiredSocket, char* buffer, int bufferSize) {
-    int received = recv(desiredSocket, buffer, bufferSize - 1, 0);
+void Socket::WaitForResponse(char* buffer, int buffersize) {
+    int received = recv(currentSocket, buffer, buffersize - 1, 0);
     if (received <= 0) {
-        buffer = (char*)"COULD NOT GET CLIENT MESSAGE.";
+        strcpy(buffer, "COULD NOT GET MESSAGE.");
         return;
     };
     buffer[received] = 0;
+}
+
+Socket::Socket(SOCKET windowSocket) {
+    currentSocket = windowSocket;
+    //Pas besoin de mettre l'adresse ici puisque le socket la contient deja.
 }
 
 void PrintHello() {
