@@ -1,9 +1,9 @@
 #include "entrypoint.h"
 #include <iostream>
 #include <string>
-#include "ClientServerData.h"
+#include "ServerSocket.h"
+#include "ClientSocket.h"
 
-#define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 
 void InitializeWinSock() {
@@ -17,7 +17,7 @@ void HandleClient(ClientSocket& client) {
 
     while (true)
     {
-        client.WaitForResponse(buffer, sizeof(buffer));
+        if (!client.WaitForResponse(buffer, sizeof(buffer))) continue;
         std::cout << ">> " << buffer;
     }
 
@@ -27,7 +27,6 @@ void HandleClient(ClientSocket& client) {
 void server_start()
 {
     InitializeWinSock();
-    PrintHello(); //Fonction test
 
     ServerSocket serverSocket(6667);
     serverSocket.StartListening();

@@ -1,4 +1,6 @@
-#include "ClientServerData.h"
+#include <winsock2.h>
+#include <iostream>
+#include "Socket.h"
 
 Socket::Socket(int address) {
 currentSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -20,20 +22,17 @@ void Socket::Send(const char* buffer, int buffersize) {
     };
 }
 
-void Socket::WaitForResponse(char* buffer, int buffersize) {
+bool Socket::WaitForResponse(char* buffer, int buffersize) {
     int received = recv(currentSocket, buffer, buffersize - 1, 0);
     if (received <= 0) {
         strcpy(buffer, "COULD NOT GET MESSAGE.");
-        return;
+        return false;
     };
     buffer[received] = 0;
+    return true;
 }
 
-Socket::Socket(SOCKET windowSocket) {
-    currentSocket = windowSocket;
+Socket::Socket(void* windowSocket) {
+    currentSocket = *(SOCKET*)windowSocket;
     //Pas besoin de mettre l'adresse ici puisque le socket la contient deja.
-}
-
-void PrintHello() {
-   std::cout << "Hello!\n";
 }

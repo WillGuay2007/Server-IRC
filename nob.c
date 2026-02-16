@@ -8,9 +8,9 @@
 
 void addSharedSources(Cmd *cmd) {
     cmd_append(cmd, "-Isrc/SharedUtils");
-    cmd_append(cmd, "src/SharedUtils/ClientServerData.cpp");
-    cmd_append(cmd, "src/SharedUtils/ServerData.cpp");
-    cmd_append(cmd, "src/SharedUtils/ClientData.cpp");
+    cmd_append(cmd, "src/SharedUtils/Socket.cpp");
+    cmd_append(cmd, "src/SharedUtils/ClientSocket.cpp");
+    cmd_append(cmd, "src/SharedUtils/ServerSocket.cpp");
 }
 
 void addSharedLibs(Cmd *cmd) {
