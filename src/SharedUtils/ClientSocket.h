@@ -6,5 +6,7 @@ public:
     ClientSocket(int address);
     ClientSocket(void* windowSocket);
 
+    void Send(const char* buffer, int buffersize);
+    bool WaitForResponse(char* buffer, int buffersize);
     void Connect();
 };

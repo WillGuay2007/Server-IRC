@@ -6,6 +6,6 @@ public:
     ServerSocket(int address);
     ServerSocket(void* windowSocket);
 
-    ClientSocket WaitForConnection();
+    ClientSocket* WaitForConnection();
     void StartListening();
 };

@@ -11,6 +11,7 @@ void addSharedSources(Cmd *cmd) {
     cmd_append(cmd, "src/SharedUtils/Socket.cpp");
     cmd_append(cmd, "src/SharedUtils/ClientSocket.cpp");
     cmd_append(cmd, "src/SharedUtils/ServerSocket.cpp");
+    cmd_append(cmd, "src/SharedUtils/Winsock2Init.cpp");
 }
 
 void addSharedLibs(Cmd *cmd) {

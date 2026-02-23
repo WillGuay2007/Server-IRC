@@ -1,15 +1,11 @@
 #include "entrypoint.h"
 #include <iostream>
-#include <string>
+#include <cstring>
 #include "ServerSocket.h"
 #include "ClientSocket.h"
+#include "Winsock2Init.h"
+#include <thread>
 
-#include <winsock2.h>
-
-void InitializeWinSock() {
-    WSADATA data;
-    WSAStartup(MAKEWORD(2,2), &data);
-}
 void HandleClient(ClientSocket& client) {
     std::cout << "Client connected\n";
 
@@ -17,8 +13,14 @@ void HandleClient(ClientSocket& client) {
 
     while (true)
     {
-        if (!client.WaitForResponse(buffer, sizeof(buffer))) continue;
-        std::cout << ">> " << buffer;
+        if (!client.WaitForResponse(buffer, sizeof(buffer)))
+        {
+            break;
+        }
+        std::cout << "Client says: " << buffer;
+
+        const char* reply = "Hello client\r\n";
+        client.Send(reply, (int)strlen(reply));
     }
 
     std::cout << "Client disconnected\n";
@@ -26,7 +28,7 @@ void HandleClient(ClientSocket& client) {
 
 void server_start()
 {
-    InitializeWinSock();
+    InitWinsock2();
 
     ServerSocket serverSocket(6667);
     serverSocket.StartListening();
@@ -35,9 +37,14 @@ void server_start()
 
     while (true)
     {
-        ClientSocket client = serverSocket.WaitForConnection();
-        HandleClient(client);
+        ClientSocket* client = serverSocket.WaitForConnection();
+        if (!client) continue;
+        std::thread clientThread([client]() {
+            HandleClient(*client);
+            delete client;
+        });
+        clientThread.detach();
     }
 
-    WSACleanup();
+    DeInitWinsock2();
 }
