@@ -1,10 +1,33 @@
 #include "entrypoint.h"
 #include <iostream>
-#include <cstring>
+#include <string.h>
 #include "ServerSocket.h"
 #include "ClientSocket.h"
 #include "Winsock2Init.h"
 #include <thread>
+#include "ICommand.h"
+#include "ServerCommands.h"
+
+
+const char* commandStrings[] = {
+    "FIND",
+    "NICK",
+    "JOIN",
+};
+
+void FindAndExecuteCommand(char* receivedLine) {
+    std::string line(receivedLine);
+    if (line.size() >= 2 && line.substr(line.size() - 2) == "\r\n") {
+        line.erase(line.size() - 2);
+    }
+    int sizeOfCmdArray = sizeof(commandStrings) / sizeof(commandStrings[0]);
+    for (int i = 0; i < sizeOfCmdArray; i++) {
+        std::string possibleCommandString(commandStrings[i]);
+        if (line == possibleCommandString) {
+            std::cout << "Command found: " << possibleCommandString << std::endl;
+        }
+    }
+}
 
 void HandleClient(ClientSocket& client) {
     std::cout << "Client connected\n";
@@ -15,10 +38,10 @@ void HandleClient(ClientSocket& client) {
     {
         if (!client.WaitForResponse(buffer, sizeof(buffer)))
         {
-            break;
+            break; //Déconnecter le client si ca fail.
         }
         std::cout << "Client says: " << buffer;
-
+        FindAndExecuteCommand(buffer);
         const char* reply = "Hello client\r\n";
         client.Send(reply, (int)strlen(reply));
     }

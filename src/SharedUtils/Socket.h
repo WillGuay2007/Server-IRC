@@ -8,7 +8,6 @@ private:
 protected:
     void* GetWindowSocket();
     void* GetAddress();
-
 public:
     Socket(int address);
     Socket(void* windowSocket);
