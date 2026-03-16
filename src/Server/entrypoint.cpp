@@ -5,6 +5,8 @@
 #include "ClientSocket.h"
 #include "Winsock2Init.h"
 #include <thread>
+#include <unordered_map>
+#include <functional>
 #include "ICommand.h"
 #include "ServerCommands.h"
 
@@ -15,18 +17,25 @@ const char* commandStrings[] = {
     "JOIN",
 };
 
-void FindAndExecuteCommand(char* receivedLine) {
+std::unordered_map<std::string, std::function<ICommand*()>> commandFactory = {
+    {"JOIN", []() { return new cmd_join(); }},
+    {"FIND", []() { return new cmd_find(); }},
+    {"NICK", []() { return new cmd_nick(); }}
+};
+
+ICommand* FindCommand(char* receivedLine)
+{
     std::string line(receivedLine);
-    if (line.size() >= 2 && line.substr(line.size() - 2) == "\r\n") {
-        line.erase(line.size() - 2);
-    }
-    int sizeOfCmdArray = sizeof(commandStrings) / sizeof(commandStrings[0]);
-    for (int i = 0; i < sizeOfCmdArray; i++) {
-        std::string possibleCommandString(commandStrings[i]);
-        if (line == possibleCommandString) {
-            std::cout << "Command found: " << possibleCommandString << std::endl;
-        }
-    }
+
+    if (line.size() >= 2 && line.substr(line.size() - 2) == "\r\n") line.erase(line.size() - 2);
+
+    std::string command = line.substr(0, line.find(' '));
+
+    auto it = commandFactory.find(command);
+
+    if (it != commandFactory.end()) return it->second();
+
+    return nullptr;
 }
 
 void HandleClient(ClientSocket& client) {
@@ -41,7 +50,8 @@ void HandleClient(ClientSocket& client) {
             break; //Déconnecter le client si ca fail.
         }
         std::cout << "Client says: " << buffer;
-        FindAndExecuteCommand(buffer);
+        ICommand* command = FindCommand(buffer);
+        command->execute();
         const char* reply = "Hello client\r\n";
         client.Send(reply, (int)strlen(reply));
     }
