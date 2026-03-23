@@ -4,26 +4,63 @@
 #include "ServerSocket.h"
 #include "ClientSocket.h"
 #include "Winsock2Init.h"
+#include "Channel.h"
 #include <thread>
-#include <unordered_map>
-#include <functional>
-#include "ICommand.h"
-#include "ServerCommands.h"
+#include "ServerClient.h"
+#include <vector>
 
-
-const char* commandStrings[] = {
-    "FIND",
+std::string commands[256] {
     "NICK",
+    "USER",
     "JOIN",
+    "PRIVMSG"
 };
 
-std::unordered_map<std::string, std::function<ICommand*()>> commandFactory = {
-    {"JOIN", []() { return new cmd_join(); }},
-    {"FIND", []() { return new cmd_find(); }},
-    {"NICK", []() { return new cmd_nick(); }}
+std::vector<Channel*> channels {
+    new Channel("#General")
 };
 
-ICommand* FindCommand(char* receivedLine)
+//First parameter: Channel
+void HandleJoin(ServerClient& client, std::vector<std::string>& parameters) {
+    if (client.IsInChannel(parameters[0])) {
+        std::string response("You are already a member of channel: " + parameters[0] +  "\n");
+        client.GetSocket()->Send(response.c_str(), response.size());
+    }
+    for (int i = 0; i < channels.size(); i++) {
+        if (channels[i]->GetName() == parameters[0]) {
+            std::string response("Executing command: JOIN\nJoining " + parameters[0] + " channel\n");
+            channels[i]->AddMember(&client);
+            client.AddChannel(channels[i]);
+            client.GetSocket()->Send(response.c_str(), response.size());
+            return;
+        } else {
+            std::cout << parameters[0] << " " << channels[i]->GetName();
+            std::string response("Channel " + parameters[0] + " is invalid.\n");
+            client.GetSocket()->Send(response.c_str(), response.size()); 
+        }
+    }
+}
+
+void GetParameters(std::vector<std::string>& parametersVector, std::string line)
+{
+    size_t firstSpace = line.find(' ');
+
+    if (firstSpace == std::string::npos) return;
+
+    std::string params = line.substr(firstSpace + 1);
+
+    size_t pos = 0;
+
+    while ((pos = params.find(' ')) != std::string::npos)
+    {
+        parametersVector.push_back(params.substr(0, pos));
+        params.erase(0, pos + 1);
+    }
+
+    if (!params.empty()) parametersVector.push_back(params);
+}
+
+void ExecuteCommand(char* receivedLine, ServerClient& client)
 {
     std::string line(receivedLine);
 
@@ -31,29 +68,33 @@ ICommand* FindCommand(char* receivedLine)
 
     std::string command = line.substr(0, line.find(' '));
 
-    auto it = commandFactory.find(command);
-
-    if (it != commandFactory.end()) return it->second();
-
-    return nullptr;
+    for (int i = 0; i < (sizeof(commands) / sizeof(commands[0])); i++) {
+        if (command == commands[i]) {
+            std::vector<std::string> parameters = std::vector<std::string>();
+            GetParameters(parameters, line);
+            if (parameters.empty()) return;
+            if (command == "JOIN") {
+                HandleJoin(client, parameters);
+            }
+            return;
+        }
+    }
+    std::string msg = "Command " + command + " not found.\n";
+    client.GetSocket()->Send(msg.c_str(), msg.size());
 }
 
-void HandleClient(ClientSocket& client) {
+void HandleClient(ServerClient& client) {
     std::cout << "Client connected\n";
 
     char buffer[500];
 
     while (true)
     {
-        if (!client.WaitForResponse(buffer, sizeof(buffer)))
+        if (!client.GetSocket()->WaitForResponse(buffer, sizeof(buffer)))
         {
             break; //Déconnecter le client si ca fail.
         }
-        std::cout << "Client says: " << buffer;
-        ICommand* command = FindCommand(buffer);
-        command->execute();
-        const char* reply = "Hello client\r\n";
-        client.Send(reply, (int)strlen(reply));
+        ExecuteCommand(buffer, client);
     }
 
     std::cout << "Client disconnected\n";
@@ -70,7 +111,8 @@ void server_start()
 
     while (true)
     {
-        ClientSocket* client = serverSocket.WaitForConnection();
+        ClientSocket* clientSocket = serverSocket.WaitForConnection();
+        ServerClient* client = new ServerClient(clientSocket);
         if (!client) continue;
         std::thread clientThread([client]() {
             HandleClient(*client);

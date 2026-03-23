@@ -10,7 +10,7 @@
 void client_start()
 {
     
-InitWinsock2();
+    InitWinsock2();
 
     ClientSocket* client = new ClientSocket(6667);
 
@@ -49,7 +49,7 @@ InitWinsock2();
                 std::string msg = std::string(inputBuffer) + "\r\n";
                 client->Send(msg.c_str(), (int)msg.size());
                 if (client->WaitForResponse(recvBuffer, sizeof(recvBuffer))) {
-                    std::cout << "Server says: " << recvBuffer << std::endl;
+                    std::cout << "Server: " << recvBuffer << std::endl;
                 }
                 inputBuffer[0] = '\0';
             }

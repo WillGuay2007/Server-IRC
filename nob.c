@@ -11,6 +11,8 @@ void addSharedSources(Cmd *cmd) {
     cmd_append(cmd, "src/SharedUtils/ClientSocket.cpp");
     cmd_append(cmd, "src/SharedUtils/ServerSocket.cpp");
     cmd_append(cmd, "src/SharedUtils/Winsock2Init.cpp");
+    cmd_append(cmd, "src/SharedUtils/Channel.cpp");
+    cmd_append(cmd, "src/SharedUtils/ServerClient.cpp");
 }
 
 void addSharedLibs(Cmd *cmd) {
@@ -62,7 +64,6 @@ void build_server(void)
     
     cmd_append(&cmd, "src/Server/main.cpp");
     cmd_append(&cmd, "src/Server/entrypoint.cpp");
-    cmd_append(&cmd, "src/Server/ServerCommands.cpp");
     
     
     addSharedSources(&cmd);
