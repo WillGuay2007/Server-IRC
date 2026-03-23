@@ -14,17 +14,23 @@ std::vector<std::string> commands {
     "NICK",
     "USER",
     "JOIN",
-    "PRIVMSG"
+    "PRIVMSG",
+    "PING"
 };
 
 std::vector<ServerClient*> clients;
 
-std::string MOTD = "You either cum in the sink or sink in the cum\n";
-std::string serverName = "ScaryServer";
+const std::string MOTD = "You either cum in the sink or sink in the cum\n";
+const std::string serverName = "ScaryServer";
 
 std::vector<Channel*> channels {
     new Channel("#General")
 };
+
+//Exemple: :ScaryServer 431 
+std::string GeneratePrefix(ServerClient& client, EServerResponse response) {
+    return ":" + serverName + " " + std::to_string((int)response) + " ";
+}
 
 void SendStringResponse(ServerClient& client, std::string response) {
     client.GetSocket()->Send(response.c_str(), response.size()); 
@@ -32,6 +38,10 @@ void SendStringResponse(ServerClient& client, std::string response) {
 
 //First parameter: Channel
 void HandleJoin(ServerClient& client, std::vector<std::string>& parameters) {
+    if (parameters.empty()) {
+
+        return;
+    }
     std::string channelName = parameters[0];
     if (client.IsInChannel(channelName)) {
         SendStringResponse(client, "You are already a member of channel: " + channelName +  "\n");
@@ -50,14 +60,28 @@ void HandleJoin(ServerClient& client, std::vector<std::string>& parameters) {
 }
 
 void HandleMOTD(ServerClient& client, std::vector<std::string>& parameters) {
+    if (parameters.empty()) {
 
+        return;
+    }
 }
 
-void HandleNick(ServerClient& client, std::vector<std::string>& parameter) {
-    std::string chosenNick = parameter[0];
+void HandleNick(ServerClient& client, std::vector<std::string>& parameters) {
+    if (parameters.empty()) {
+        SendStringResponse(client, 
+                GeneratePrefix(client, ERR_NONICKNAMEGIVEN) +
+                ":No nickname given\n"
+            );
+        return;
+    }
+    std::string chosenNick = parameters[0];
     for (ServerClient* _client : clients) {
         if (_client->GetNick() == chosenNick) {
-            SendStringResponse(client, "Nick is already chosen\n");
+            if (client.GetSocket() == _client->GetSocket()) continue;
+            SendStringResponse(client, 
+                GeneratePrefix(client, ERR_NICKNAMEINUSE)
+                + client.GetNick() + " " + chosenNick + " :Nickname is already in use.\n"
+            );
             return;
         }
     }
@@ -66,8 +90,38 @@ void HandleNick(ServerClient& client, std::vector<std::string>& parameter) {
     SendStringResponse(client, "Set nick to: " + client.GetNick());
 }
 
-void HandleUser(ServerClient& client, std::vector<std::string>& parameter) {
+void HandleUser(ServerClient& client, std::vector<std::string>& parameters) {
+    if (parameters.empty() || parameters.size() < 4) {
+        SendStringResponse(client,
+             GeneratePrefix(client, ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n"
+            );
+        return;
+    }
+    if (client.GetRealName().length() != 0 || client.GetUsername().length() != 0) {
+        SendStringResponse(client,
+             GeneratePrefix(client, ERR_ALREADYREGISTERED) + client.GetNick() + " USER " + ":You may not re-register.\n"
+            );
+        return;
+    }
+    std::string username = parameters[0];
+    std::string realName = parameters[3]; //TODO: Implementer le colon dans GetParameters pour message avec espace
+    if (realName.length() <= 0 || username.length() <= 0) {
+        SendStringResponse(client,
+             GeneratePrefix(client, ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n"
+            );
+        return;
+    }
+    client.SetUsername(username);
+    client.SetRealName(realName);
+    SendStringResponse(client, "Succesfully executed command USER.\n");
+}
 
+void HandlePing(ServerClient& client, std::vector<std::string>& parameters) {
+    if (parameters.empty()) {
+        SendStringResponse(client, "PONG\n");
+        return;
+    }
+    SendStringResponse(client, "PONG " + parameters[0] + "\n");
 }
 
 void GetParameters(std::vector<std::string>& parametersVector, std::string line)
@@ -97,11 +151,10 @@ void ExecuteCommand(char* receivedLine, ServerClient& client)
 
     std::string command = line.substr(0, line.find(' '));
 
-    for (int i = 0; i < command.size(); i++) {
+    for (int i = 0; i < commands.size(); i++) {
         if (command == commands[i]) {
             std::vector<std::string> parameters = std::vector<std::string>();
             GetParameters(parameters, line);
-            if (parameters.empty()) return;
             if (command == "JOIN") {
                 HandleJoin(client, parameters);
             } else if (command == "MOTD") {
@@ -110,6 +163,8 @@ void ExecuteCommand(char* receivedLine, ServerClient& client)
                 HandleNick(client, parameters);
             } else if (command == "USER") {
                 HandleUser(client, parameters);
+            } else if (command == "PING") {
+                HandlePing(client, parameters);
             }
             return;
         }

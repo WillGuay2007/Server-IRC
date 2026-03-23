@@ -12,7 +12,7 @@ public:
 
     ClientSocket* GetSocket() const {return m_socket;}
     bool IsInChannel(std::string channelName);
-    const std::string& GetNick() const { return m_nick; }
+    const std::string GetNick() const { return m_nick != "" ? m_nick : std::string("*");}
     const std::string& GetUsername() const { return m_username; }
     const std::string& GetRealName() const { return m_realName; }
 
