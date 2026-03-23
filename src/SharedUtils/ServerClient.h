@@ -24,8 +24,8 @@ public:
 
 private:
     ClientSocket* m_socket;
-    std::string m_nick;
-    std::string m_username;
-    std::string m_realName;
+    std::string m_nick = "";
+    std::string m_username = "";
+    std::string m_realName = "";
     std::vector<Channel*> m_channels;
 };

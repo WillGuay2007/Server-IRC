@@ -19,8 +19,6 @@ void addSharedLibs(Cmd *cmd) {
     cmd_append(cmd, "-lws2_32");
 }
 
-
-
 void build_server(void);
 void build_client(File_Paths* o_files);
 int main(int argc, char** argv)
@@ -86,14 +84,6 @@ void build_client(File_Paths* o_files)
     
     cmd_append(&cmd, "src/Client/main.cpp");
     cmd_append(&cmd, "src/Client/entrypoint.cpp");
-
-
-    cmd_append(&cmd, RAYLIB_INCLUDES);
-    cmd_append(&cmd, RLIMGUI_INCLUDES);
-
-    for (int i = 0; i < o_files->count; ++i) {
-        cmd_append(&cmd, o_files->items[i]);
-    }
 
     addSharedSources(&cmd);
 

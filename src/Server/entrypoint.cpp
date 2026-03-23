@@ -8,37 +8,66 @@
 #include <thread>
 #include "ServerClient.h"
 #include <vector>
+#include "ServerResponses.h"
 
-std::string commands[256] {
+std::vector<std::string> commands {
     "NICK",
     "USER",
     "JOIN",
     "PRIVMSG"
 };
 
+std::vector<ServerClient*> clients;
+
+std::string MOTD = "You either cum in the sink or sink in the cum\n";
+std::string serverName = "ScaryServer";
+
 std::vector<Channel*> channels {
     new Channel("#General")
 };
 
+void SendStringResponse(ServerClient& client, std::string response) {
+    client.GetSocket()->Send(response.c_str(), response.size()); 
+}
+
 //First parameter: Channel
 void HandleJoin(ServerClient& client, std::vector<std::string>& parameters) {
-    if (client.IsInChannel(parameters[0])) {
-        std::string response("You are already a member of channel: " + parameters[0] +  "\n");
-        client.GetSocket()->Send(response.c_str(), response.size());
+    std::string channelName = parameters[0];
+    if (client.IsInChannel(channelName)) {
+        SendStringResponse(client, "You are already a member of channel: " + channelName +  "\n");
     }
     for (int i = 0; i < channels.size(); i++) {
-        if (channels[i]->GetName() == parameters[0]) {
-            std::string response("Executing command: JOIN\nJoining " + parameters[0] + " channel\n");
+        if (channels[i]->GetName() == channelName) {
             channels[i]->AddMember(&client);
             client.AddChannel(channels[i]);
-            client.GetSocket()->Send(response.c_str(), response.size());
+            SendStringResponse(client, "Executing command: JOIN\nJoining " + channelName + " channel\n");
             return;
         } else {
             std::cout << parameters[0] << " " << channels[i]->GetName();
-            std::string response("Channel " + parameters[0] + " is invalid.\n");
-            client.GetSocket()->Send(response.c_str(), response.size()); 
+            SendStringResponse(client, "Channel " + parameters[0] + " is invalid.\n");
         }
     }
+}
+
+void HandleMOTD(ServerClient& client, std::vector<std::string>& parameters) {
+
+}
+
+void HandleNick(ServerClient& client, std::vector<std::string>& parameter) {
+    std::string chosenNick = parameter[0];
+    for (ServerClient* _client : clients) {
+        if (_client->GetNick() == chosenNick) {
+            SendStringResponse(client, "Nick is already chosen\n");
+            return;
+        }
+    }
+    
+    client.SetNick(chosenNick);
+    SendStringResponse(client, "Set nick to: " + client.GetNick());
+}
+
+void HandleUser(ServerClient& client, std::vector<std::string>& parameter) {
+
 }
 
 void GetParameters(std::vector<std::string>& parametersVector, std::string line)
@@ -68,13 +97,19 @@ void ExecuteCommand(char* receivedLine, ServerClient& client)
 
     std::string command = line.substr(0, line.find(' '));
 
-    for (int i = 0; i < (sizeof(commands) / sizeof(commands[0])); i++) {
+    for (int i = 0; i < command.size(); i++) {
         if (command == commands[i]) {
             std::vector<std::string> parameters = std::vector<std::string>();
             GetParameters(parameters, line);
             if (parameters.empty()) return;
             if (command == "JOIN") {
                 HandleJoin(client, parameters);
+            } else if (command == "MOTD") {
+                HandleMOTD(client, parameters);
+            } else if (command == "NICK") {
+                HandleNick(client, parameters);
+            } else if (command == "USER") {
+                HandleUser(client, parameters);
             }
             return;
         }
@@ -94,8 +129,20 @@ void HandleClient(ServerClient& client) {
         {
             break; //Déconnecter le client si ca fail.
         }
-        ExecuteCommand(buffer, client);
+
+        std::string clientResponse(buffer);
+
+        size_t pos;
+        while ((pos = clientResponse.find("\r\n")) != std::string::npos)
+        {
+            std::string line = clientResponse.substr(0, pos);
+
+            clientResponse.erase(0, pos + 2);
+
+            ExecuteCommand((char*)line.c_str(), client);
+        }
     }
+
 
     std::cout << "Client disconnected\n";
 }
@@ -114,6 +161,7 @@ void server_start()
         ClientSocket* clientSocket = serverSocket.WaitForConnection();
         ServerClient* client = new ServerClient(clientSocket);
         if (!client) continue;
+        clients.push_back(client);
         std::thread clientThread([client]() {
             HandleClient(*client);
             delete client;
