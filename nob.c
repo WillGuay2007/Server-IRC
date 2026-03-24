@@ -62,7 +62,8 @@ void build_server(void)
     
     cmd_append(&cmd, "src/Server/main.cpp");
     cmd_append(&cmd, "src/Server/entrypoint.cpp");
-    
+    cmd_append(&cmd, "src/Server/handlers.cpp");
+
     
     addSharedSources(&cmd);
     
@@ -78,12 +79,20 @@ void build_server(void)
 void build_client(File_Paths* o_files)
 {
     Cmd cmd = {0};
-    
+
     nob_cc(&cmd);
     cmd_append(&cmd, "-ggdb3");
-    
+
     cmd_append(&cmd, "src/Client/main.cpp");
     cmd_append(&cmd, "src/Client/entrypoint.cpp");
+
+
+    cmd_append(&cmd, RAYLIB_INCLUDES);
+    cmd_append(&cmd, RLIMGUI_INCLUDES);
+
+    for (int i = 0; i < o_files->count; ++i) {
+        cmd_append(&cmd, o_files->items[i]);
+    }
 
     addSharedSources(&cmd);
 
