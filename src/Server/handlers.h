@@ -14,3 +14,4 @@ void HandleMOTD(ServerClient& client, std::vector<std::string>& parameters);
 void HandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*> clients);
 void HandleUser(ServerClient& client, std::vector<std::string>& parameters);
 void HandlePing(ServerClient& client, std::vector<std::string>& parameters);
+bool CheckIfUserIsRegistered(ServerClient& client);

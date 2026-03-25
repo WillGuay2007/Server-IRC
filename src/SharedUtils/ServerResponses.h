@@ -1,7 +1,8 @@
 #pragma once
 
 enum EServerResponse {
-    RPL_WELCOME = 1,
+    RPL_WELCOME = 001,
+    ERR_NOMOTD = 422,
     ERR_NONICKNAMEGIVEN = 431,
     ERR_ERRONEUSNICKNAME = 432,
     ERR_NICKNAMEINUSE = 433,

@@ -11,14 +11,15 @@
 #include "ServerResponses.h"
 #include "handlers.h"
 #include "Channel.h"
-#include <vector>
+#include "UnitTest.h"
 
 std::vector<std::string> commands {
     "NICK",
     "USER",
     "JOIN",
     "PRIVMSG",
-    "PING"
+    "PING",
+    "MOTD"
 };
 
 std::vector<Channel*> channels {
@@ -34,13 +35,21 @@ void GetParameters(std::vector<std::string>& parametersVector, std::string line)
     if (firstSpace == std::string::npos) return;
 
     std::string params = line.substr(firstSpace + 1);
-
     size_t pos = 0;
-
-    while ((pos = params.find(' ')) != std::string::npos)
+    
+    while (params[0] != ':' && (pos = params.find(' ') != std::string::npos))
     {
+        if ((params[pos + 1] == ':')) {
+            pos++;
+            break;
+        }
         parametersVector.push_back(params.substr(0, pos));
         params.erase(0, pos + 1);
+    }
+
+    if (params[pos] == ':') {
+        parametersVector.push_back(params.substr(1));
+        return; //Parce que le : est toujours a la fin.
     }
 
     if (!params.empty()) parametersVector.push_back(params);
@@ -68,6 +77,8 @@ void ExecuteCommand(char* receivedLine, ServerClient& client)
                 HandleUser(client, parameters);
             } else if (command == "PING") {
                 HandlePing(client, parameters);
+            } else if (command == "MOTD") {
+                HandleMOTD(client, parameters);
             }
             return;
         }
