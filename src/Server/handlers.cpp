@@ -9,7 +9,7 @@ void SendStringResponse(ServerClient& client, std::string response) {
     client.GetSocket()->Send(response.c_str(), response.size()); 
 }
 
-void HandleJoin(ServerClient& client, std::vector<std::string>& parameters, std::vector<Channel*> channels) {
+void HandleJoin(ServerClient& client, std::vector<std::string>& parameters, std::vector<Channel*>& channels) {
     if (parameters.empty()) {
 
         return;
@@ -17,6 +17,7 @@ void HandleJoin(ServerClient& client, std::vector<std::string>& parameters, std:
     std::string channelName = parameters[0];
     if (client.IsInChannel(channelName)) {
         SendStringResponse(client, "You are already a member of channel: " + channelName +  "\n");
+        return;
     }
     for (int i = 0; i < channels.size(); i++) {
         if (channels[i]->GetName() == channelName) {
@@ -24,11 +25,9 @@ void HandleJoin(ServerClient& client, std::vector<std::string>& parameters, std:
             client.AddChannel(channels[i]);
             SendStringResponse(client, "Executing command: JOIN\nJoining " + channelName + " channel\n");
             return;
-        } else {
-            std::cout << parameters[0] << " " << channels[i]->GetName();
-            SendStringResponse(client, "Channel " + parameters[0] + " is invalid.\n");
         }
     }
+    SendStringResponse(client, "Channel " + parameters[0] + " is invalid.\n");
 }
 
 void HandleMOTD(ServerClient& client, std::vector<std::string>& parameters) {
@@ -39,7 +38,7 @@ void HandleMOTD(ServerClient& client, std::vector<std::string>& parameters) {
     }
 }
 
-void HandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*> clients){
+void HandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*>& clients){
     if (parameters.empty()) {
         SendStringResponse(client, 
                 GeneratePrefix(client, ERR_NONICKNAMEGIVEN) +

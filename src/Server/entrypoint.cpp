@@ -12,15 +12,8 @@
 #include "handlers.h"
 #include "Channel.h"
 #include "UnitTest.h"
-
-std::vector<std::string> commands {
-    "NICK",
-    "USER",
-    "JOIN",
-    "PRIVMSG",
-    "PING",
-    "MOTD"
-};
+#include <unordered_map>
+#include <functional>
 
 std::vector<Channel*> channels {
     new Channel("#General")
@@ -28,18 +21,25 @@ std::vector<Channel*> channels {
 
 std::vector<ServerClient*> clients;
 
+std::unordered_map<std::string, std::function<void(ServerClient&, std::vector<std::string>&)>> commandsMap {
+    {"NICK", [](ServerClient& client, std::vector<std::string>& params) {HandleNick(client, params, clients);}},
+    {"USER", [](ServerClient& client, std::vector<std::string>& params) {HandleUser(client, params);}},
+    {"MOTD", [](ServerClient& client, std::vector<std::string>& params) {HandleMOTD(client, params);}},
+    {"PING", [](ServerClient& client, std::vector<std::string>& params) {HandlePing(client, params);}},
+    {"JOIN", [](ServerClient& client, std::vector<std::string>& params) {HandleJoin(client, params, channels);}},
+};
+
 void GetParameters(std::vector<std::string>& parametersVector, std::string line)
 {
     size_t firstSpace = line.find(' ');
-
     if (firstSpace == std::string::npos) return;
 
     std::string params = line.substr(firstSpace + 1);
     size_t pos = 0;
     
-    while (params[0] != ':' && (pos = params.find(' ') != std::string::npos))
+    while (!params.empty() && params[0] != ':' && (pos = params.find(' ') != std::string::npos))
     {
-        if ((params[pos + 1] == ':')) {
+        if (pos + 1 < params.size() && (params[pos + 1] == ':')) {
             pos++;
             break;
         }
@@ -47,7 +47,7 @@ void GetParameters(std::vector<std::string>& parametersVector, std::string line)
         params.erase(0, pos + 1);
     }
 
-    if (params[pos] == ':') {
+    if (!params.empty() && params[pos] == ':') {
         parametersVector.push_back(params.substr(1));
         return; //Parce que le : est toujours a la fin.
     }
@@ -62,29 +62,15 @@ void ExecuteCommand(char* receivedLine, ServerClient& client)
     if (line.size() >= 2 && line.substr(line.size() - 2) == "\r\n") line.erase(line.size() - 2);
 
     std::string command = line.substr(0, line.find(' '));
+    std::vector<std::string> parameters;
+    GetParameters(parameters, line);
 
-    for (int i = 0; i < commands.size(); i++) {
-        if (command == commands[i]) {
-            std::vector<std::string> parameters = std::vector<std::string>();
-            GetParameters(parameters, line);
-            if (command == "JOIN") {
-                HandleJoin(client, parameters, channels);
-            } else if (command == "MOTD") {
-                HandleMOTD(client, parameters);
-            } else if (command == "NICK") {
-                HandleNick(client, parameters, clients);
-            } else if (command == "USER") {
-                HandleUser(client, parameters);
-            } else if (command == "PING") {
-                HandlePing(client, parameters);
-            } else if (command == "MOTD") {
-                HandleMOTD(client, parameters);
-            }
-            return;
-        }
+    if (commandsMap.count(command)) {
+        commandsMap[command](client, parameters);
+    } else {
+        std::string msg = "Command " + command + " not found.\n";
+        client.GetSocket()->Send(msg.c_str(), msg.size());
     }
-    std::string msg = "Command " + command + " not found.\n";
-    client.GetSocket()->Send(msg.c_str(), msg.size());
 }
 
 void HandleClient(ServerClient& client) {
@@ -116,6 +102,18 @@ void HandleClient(ServerClient& client) {
     std::cout << "Client disconnected\n";
 }
 
+void RemoveClient(ServerClient* client)
+{
+    for (auto it = clients.begin(); it != clients.end(); it++)
+    {
+        if (*it == client)
+        {
+            clients.erase(it);
+            break;
+        }
+    }
+}
+
 void server_start()
 {
     InitWinsock2();
@@ -133,6 +131,7 @@ void server_start()
         clients.push_back(client);
         std::thread clientThread([client]() {
             HandleClient(*client);
+            RemoveClient(client);
             delete client;
         });
         clientThread.detach();

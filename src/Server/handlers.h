@@ -9,9 +9,9 @@ const std::string serverName = "ScaryServer";
 
 std::string GeneratePrefix(ServerClient& client, EServerResponse response);
 void SendStringResponse(ServerClient& client, std::string response);
-void HandleJoin(ServerClient& client, std::vector<std::string>& parameters, std::vector<Channel*> channels);
+void HandleJoin(ServerClient& client, std::vector<std::string>& parameters, std::vector<Channel*>& channels);
 void HandleMOTD(ServerClient& client, std::vector<std::string>& parameters);
-void HandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*> clients);
+void HandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*>& clients);
 void HandleUser(ServerClient& client, std::vector<std::string>& parameters);
 void HandlePing(ServerClient& client, std::vector<std::string>& parameters);
 bool CheckIfUserIsRegistered(ServerClient& client);
