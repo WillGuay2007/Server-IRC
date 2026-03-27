@@ -9,102 +9,81 @@ void SendStringResponse(ServerClient& client, std::string response) {
     client.GetSocket()->Send(response.c_str(), response.size()); 
 }
 
-void HandleJoin(ServerClient& client, std::vector<std::string>& parameters, std::vector<Channel*>& channels) {
+std::string HandleJoin(ServerClient& client, std::vector<std::string>& parameters, std::vector<Channel*>& channels) {
     if (parameters.empty()) {
-
-        return;
+        return GeneratePrefix(client, ERR_NEEDMOREPARAMS) + client.GetNick() + " JOIN " + ":Not enough parameters\n";
     }
     std::string channelName = parameters[0];
     if (client.IsInChannel(channelName)) {
-        SendStringResponse(client, "You are already a member of channel: " + channelName +  "\n");
-        return;
+        return "You are already a member of channel: " + channelName +  "\n";
     }
     for (int i = 0; i < channels.size(); i++) {
         if (channels[i]->GetName() == channelName) {
             channels[i]->AddMember(&client);
             client.AddChannel(channels[i]);
-            SendStringResponse(client, "Executing command: JOIN\nJoining " + channelName + " channel\n");
-            return;
+            return "Executing command: JOIN\nJoining " + channelName + " channel\n";
         }
     }
-    SendStringResponse(client, "Channel " + parameters[0] + " is invalid.\n");
+    return "Channel " + parameters[0] + " is invalid.\n";
 }
 
-void HandleMOTD(ServerClient& client, std::vector<std::string>& parameters) {
+std::string HandleMOTD(ServerClient& client, std::vector<std::string>& parameters) {
     if (!MOTD.empty()) {
-        SendStringResponse(client, MOTD);
+        return MOTD;
     } else {
-        SendStringResponse(client, GeneratePrefix(client, ERR_NOMOTD) + ":The server does not have a message of the day.\n");
+        return GeneratePrefix(client, ERR_NOMOTD) + ":The server does not have a message of the day.\n";
     }
 }
 
-void HandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*>& clients){
+std::string HandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*>& clients){
     if (parameters.empty()) {
-        SendStringResponse(client, 
-                GeneratePrefix(client, ERR_NONICKNAMEGIVEN) +
-                ":No nickname given\n"
-            );
-        return;
+        return GeneratePrefix(client, ERR_NONICKNAMEGIVEN) + ":No nickname given\n";
     }
     std::string chosenNick = parameters[0];
     for (ServerClient* _client : clients) {
         if (_client->GetNick() == chosenNick) {
+            //TODO: Change socket comparaison because handlers should not need to use sockets and it will break unit tests...
             if (client.GetSocket() == _client->GetSocket()) {
-                SendStringResponse(client, "You already have this username\n");
-                return;
+                return "You already have this username\n";
             }
-            SendStringResponse(client, 
-                GeneratePrefix(client, ERR_NICKNAMEINUSE)
-                + client.GetNick() + " " + chosenNick + " :Nickname is already in use.\n"
-            );
-            return;
+            return GeneratePrefix(client, ERR_NICKNAMEINUSE) + client.GetNick() + " " + chosenNick + " :Nickname is already in use.\n";
         }
     }
     
     client.SetNick(chosenNick);
     if (CheckIfUserIsRegistered(client)) {
-        SendStringResponse(client, GeneratePrefix(client, RPL_WELCOME) + client.GetNick() + ":Welcome to " + serverName + "!\n");
+        return GeneratePrefix(client, RPL_WELCOME) + client.GetNick() + ":Welcome to " + serverName + "!\n";
     } else {
-        SendStringResponse(client, "Succesfully set your NICK. Please set your USER now.\n");
+        return "Succesfully set your NICK. Please set your USER now.\n";
     }
 }
 
-void HandleUser(ServerClient& client, std::vector<std::string>& parameters) {
+std::string HandleUser(ServerClient& client, std::vector<std::string>& parameters) {
     if (parameters.empty() || parameters.size() < 4) {
-        SendStringResponse(client,
-             GeneratePrefix(client, ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n"
-            );
-        return;
+        return GeneratePrefix(client, ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n";
     }
     if (client.GetRealName().length() != 0 || client.GetUsername().length() != 0) {
-        SendStringResponse(client,
-             GeneratePrefix(client, ERR_ALREADYREGISTERED) + client.GetNick() + " USER " + ":You may not re-register.\n"
-            );
-        return;
+        return GeneratePrefix(client, ERR_ALREADYREGISTERED) + client.GetNick() + " USER " + ":You may not re-register.\n";
     }
     std::string username = parameters[0];
     std::string realName = parameters[3];
     if (realName.length() <= 0 || username.length() <= 0) {
-        SendStringResponse(client,
-             GeneratePrefix(client, ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n"
-            );
-        return;
+        return GeneratePrefix(client, ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n";
     }
     client.SetUsername(username);
     client.SetRealName(realName);
     if (CheckIfUserIsRegistered(client)) {
-        SendStringResponse(client, GeneratePrefix(client, RPL_WELCOME) + client.GetNick() + " :Welcome to " + serverName + "!\n");
+        return GeneratePrefix(client, RPL_WELCOME) + client.GetNick() + " :Welcome to " + serverName + "!\n";
     } else {
-         SendStringResponse(client, "Succesfully set your USER. Please set your NICK now.\n");
+         return "Succesfully set your USER. Please set your NICK now.\n";
     }
 }
 
-void HandlePing(ServerClient& client, std::vector<std::string>& parameters) {
+std::string HandlePing(ServerClient& client, std::vector<std::string>& parameters) {
     if (parameters.empty()) {
-        SendStringResponse(client, "PONG\n");
-        return;
+        return "PONG\n";
     }
-    SendStringResponse(client, "PONG " + parameters[0] + "\n");
+    return "PONG " + parameters[0] + "\n";
 }
 
 bool CheckIfUserIsRegistered(ServerClient& client) {

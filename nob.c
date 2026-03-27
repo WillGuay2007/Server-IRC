@@ -63,6 +63,7 @@ void build_server(void)
     cmd_append(&cmd, "src/Server/main.cpp");
     cmd_append(&cmd, "src/Server/entrypoint.cpp");
     cmd_append(&cmd, "src/Server/handlers.cpp");
+    cmd_append(&cmd, "src/Server/UnitTest.cpp");
 
     
     addSharedSources(&cmd);

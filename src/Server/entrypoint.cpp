@@ -21,12 +21,12 @@ std::vector<Channel*> channels {
 
 std::vector<ServerClient*> clients;
 
-std::unordered_map<std::string, std::function<void(ServerClient&, std::vector<std::string>&)>> commandsMap {
-    {"NICK", [](ServerClient& client, std::vector<std::string>& params) {HandleNick(client, params, clients);}},
-    {"USER", [](ServerClient& client, std::vector<std::string>& params) {HandleUser(client, params);}},
-    {"MOTD", [](ServerClient& client, std::vector<std::string>& params) {HandleMOTD(client, params);}},
-    {"PING", [](ServerClient& client, std::vector<std::string>& params) {HandlePing(client, params);}},
-    {"JOIN", [](ServerClient& client, std::vector<std::string>& params) {HandleJoin(client, params, channels);}},
+std::unordered_map<std::string, std::function<std::string(ServerClient&, std::vector<std::string>&)>> commandsMap {
+    {"NICK", [](ServerClient& client, std::vector<std::string>& params) {return HandleNick(client, params, clients);}},
+    {"USER", [](ServerClient& client, std::vector<std::string>& params) {return HandleUser(client, params);}},
+    {"MOTD", [](ServerClient& client, std::vector<std::string>& params) {return HandleMOTD(client, params);}},
+    {"PING", [](ServerClient& client, std::vector<std::string>& params) {return HandlePing(client, params);}},
+    {"JOIN", [](ServerClient& client, std::vector<std::string>& params) {return HandleJoin(client, params, channels);}},
 };
 
 void GetParameters(std::vector<std::string>& parametersVector, std::string line)
@@ -66,7 +66,7 @@ void ExecuteCommand(char* receivedLine, ServerClient& client)
     GetParameters(parameters, line);
 
     if (commandsMap.count(command)) {
-        commandsMap[command](client, parameters);
+        SendStringResponse(client, commandsMap[command](client, parameters));
     } else {
         std::string msg = "Command " + command + " not found.\n";
         client.GetSocket()->Send(msg.c_str(), msg.size());
@@ -116,6 +116,8 @@ void RemoveClient(ServerClient* client)
 
 void server_start()
 {
+    RunAllTests();
+
     InitWinsock2();
 
     ServerSocket serverSocket(6667);
