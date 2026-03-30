@@ -27,7 +27,7 @@ std::string HandleJoin(ServerClient& client, std::vector<std::string>& parameter
     return "Channel " + parameters[0] + " is invalid.\n";
 }
 
-std::string HandleMOTD(ServerClient& client, std::vector<std::string>& parameters) {
+std::string HandleMOTD(ServerClient& client) {
     if (!MOTD.empty()) {
         return MOTD;
     } else {
@@ -52,7 +52,7 @@ std::string HandleNick(ServerClient& client, std::vector<std::string>& parameter
     
     client.SetNick(chosenNick);
     if (CheckIfUserIsRegistered(client)) {
-        return GeneratePrefix(client, RPL_WELCOME) + client.GetNick() + ":Welcome to " + serverName + "!\n";
+        return GeneratePrefix(client, RPL_WELCOME) + client.GetNick() + " :Welcome to " + serverName + "!\n";
     } else {
         return "Succesfully set your NICK. Please set your USER now.\n";
     }

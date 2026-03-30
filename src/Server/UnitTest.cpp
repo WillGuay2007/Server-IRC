@@ -2,24 +2,25 @@
 #include "handlers.h"
 
 void RunAllTests() {
-    
+    TestHandleMOTD();
 }
 
-std::string TestHandleJoin(ServerClient& client, std::vector<std::string>& parameters, std::vector<Channel*>& channels) {
-    return "";
+void TestHandleJoin() {
+
 };
-std::string TestHandleMOTD(ServerClient& client, std::vector<std::string>& parameters) {
-    return "";
+void TestHandleMOTD() {
+    ServerClient client;
+    TEST(HandleMOTD(client) == MOTD);
 };
-std::string TestHandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*>& clients) {
-    return "";
+void TestHandleNick() {
+
 };
-std::string TestHandleUser(ServerClient& client, std::vector<std::string>& parameters) {
-    return "";
+void TestHandleUser() {
+
 };
-std::string TestHandlePing(ServerClient& client, std::vector<std::string>& parameters) {
-    return "";
+void TestHandlePing() {
+
 };
-bool TestCheckIfUserIsRegistered(ServerClient& client) {
-    return true;
+void TestCheckIfUserIsRegistered() {
+
 };

@@ -24,7 +24,7 @@ std::vector<ServerClient*> clients;
 std::unordered_map<std::string, std::function<std::string(ServerClient&, std::vector<std::string>&)>> commandsMap {
     {"NICK", [](ServerClient& client, std::vector<std::string>& params) {return HandleNick(client, params, clients);}},
     {"USER", [](ServerClient& client, std::vector<std::string>& params) {return HandleUser(client, params);}},
-    {"MOTD", [](ServerClient& client, std::vector<std::string>& params) {return HandleMOTD(client, params);}},
+    {"MOTD", [](ServerClient& client, std::vector<std::string>& params) {return HandleMOTD(client);}},
     {"PING", [](ServerClient& client, std::vector<std::string>& params) {return HandlePing(client, params);}},
     {"JOIN", [](ServerClient& client, std::vector<std::string>& params) {return HandleJoin(client, params, channels);}},
 };
@@ -116,7 +116,7 @@ void RemoveClient(ServerClient* client)
 
 void server_start()
 {
-    RunAllTests();
+    //RunAllTests();
 
     InitWinsock2();
 

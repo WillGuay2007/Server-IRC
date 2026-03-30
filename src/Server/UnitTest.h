@@ -16,9 +16,9 @@ do { \
 } while(0) \
 
 void RunAllTests();
-std::string TestHandleJoin(ServerClient& client, std::vector<std::string>& parameters, std::vector<Channel*>& channels);
-std::string TestHandleMOTD(ServerClient& client, std::vector<std::string>& parameters);
-std::string TestHandleNick(ServerClient& client, std::vector<std::string>& parameters, std::vector<ServerClient*>& clients);
-std::string TestHandleUser(ServerClient& client, std::vector<std::string>& parameters);
-std::string TestHandlePing(ServerClient& client, std::vector<std::string>& parameters);
-bool TestCheckIfUserIsRegistered(ServerClient& client);
+void TestHandleJoin();
+void TestHandleMOTD();
+void TestHandleNick();
+void TestHandleUser();
+void TestHandlePing();
+void TestCheckIfUserIsRegistered();

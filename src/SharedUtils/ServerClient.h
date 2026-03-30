@@ -8,6 +8,7 @@ class Channel;
 class ServerClient {
 public:
     ServerClient(ClientSocket* socket);
+    ServerClient() {};
     ~ServerClient();
 
     ClientSocket* GetSocket() const {return m_socket;}
