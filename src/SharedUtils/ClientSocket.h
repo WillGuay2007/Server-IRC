@@ -3,7 +3,7 @@
 
 class ClientSocket : public Socket {
 public:
-    ClientSocket(int address);
+    ClientSocket(int port, char* ipAddress = nullptr);
     ClientSocket(void* windowSocket);
 
     void Send(const char* buffer, int buffersize);

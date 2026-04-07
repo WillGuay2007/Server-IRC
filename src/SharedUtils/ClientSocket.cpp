@@ -2,13 +2,13 @@
 #include <winsock2.h>
 #include <iostream>
 
-ClientSocket::ClientSocket(int address) : Socket(address) {}
+ClientSocket::ClientSocket(int address, char* ipAddress) : Socket(address, ipAddress) {}
 ClientSocket::ClientSocket(void* windowSocket) : Socket(windowSocket) {}
 
 void ClientSocket::Connect() {
-    (*(sockaddr_in*)GetAddress()).sin_addr.s_addr = inet_addr("127.0.0.1");
+    (*(sockaddr_in*)GetPort()).sin_addr.s_addr = inet_addr(GetIpAddress());
 
-    if (connect(*(SOCKET*)GetWindowSocket(), (sockaddr*)GetAddress(), sizeof(*(sockaddr_in*)GetAddress())) == SOCKET_ERROR)
+    if (connect(*(SOCKET*)GetWindowSocket(), (sockaddr*)GetPort(), sizeof(*(sockaddr_in*)GetPort())) == SOCKET_ERROR)
     {
         std::cout << "Connection failed\n";
     }

@@ -4,17 +4,19 @@
 
 struct SocketImpl {
     SOCKET socket;
-    sockaddr_in address;    
+    sockaddr_in port;   
+    char* ipAddress; 
 };
 
-Socket::Socket(int address) {
+Socket::Socket(int port, char* ipAddress) {
     m_impl = new SocketImpl;
     m_impl->socket = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(address); // port IRC
-    m_impl->address = addr;
+    addr.sin_port = htons(port); // port IRC
+    m_impl->port = addr;
+    m_impl->ipAddress = ipAddress;
 }
 
 Socket::Socket(void* windowSocket) {
@@ -34,7 +36,10 @@ void* Socket::GetWindowSocket() {
     return &m_impl->socket;
 }
 
-void* Socket::GetAddress() {
-    return &m_impl->address;
+void* Socket::GetPort() {
+    return &m_impl->port;
 }
 
+char* Socket::GetIpAddress() {
+    return m_impl->ipAddress;
+}

@@ -7,9 +7,10 @@ private:
     SocketImpl* m_impl;
 protected:
     void* GetWindowSocket();
-    void* GetAddress();
+    void* GetPort();
+    char* GetIpAddress();
 public:
-    Socket(int address);
+    Socket(int address, char* ipAddress = nullptr);
     Socket(void* windowSocket);
     virtual ~Socket();
 };

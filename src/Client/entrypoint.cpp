@@ -12,7 +12,7 @@ void client_start()
     
     InitWinsock2();
 
-    ClientSocket* client = new ClientSocket(6667);
+    ClientSocket* client = new ClientSocket(6667, (char*)"127.0.0.1");
 
     client->Connect();
 
