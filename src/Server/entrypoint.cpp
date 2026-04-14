@@ -3,17 +3,20 @@
 #include <string.h>
 #include "ServerSocket.h"
 #include "ClientSocket.h"
-#include "Winsock2Init.h"
 #include "Channel.h"
 #include <thread>
 #include "ServerClient.h"
 #include <vector>
 #include "ServerResponses.h"
-#include "handlers.h"
-#include "Channel.h"
 #include "UnitTest.h"
 #include <unordered_map>
-#include <functional>
+
+#include "handler.h"
+#include "JoinHandler.h"
+#include "NickHandler.h"
+#include "UserHandler.h"
+#include "PingHandler.h"
+#include "MOTDHandler.h"
 
 std::vector<Channel*> channels {
     new Channel("#General")
@@ -21,13 +24,9 @@ std::vector<Channel*> channels {
 
 std::vector<ServerClient*> clients;
 
-std::unordered_map<std::string, std::function<std::string(ServerClient&, std::vector<std::string>&)>> commandsMap {
-    {"NICK", [](ServerClient& client, std::vector<std::string>& params) {return HandleNick(client, params, clients);}},
-    {"USER", [](ServerClient& client, std::vector<std::string>& params) {return HandleUser(client, params);}},
-    {"MOTD", [](ServerClient& client, std::vector<std::string>& params) {return HandleMOTD(client);}},
-    {"PING", [](ServerClient& client, std::vector<std::string>& params) {return HandlePing(client, params);}},
-    {"JOIN", [](ServerClient& client, std::vector<std::string>& params) {return HandleJoin(client, params, channels);}},
-};
+void SendStringResponse(ServerClient& client, std::string response) {
+    client.GetSocket()->Send(response.c_str(), response.size()); 
+}
 
 void GetParameters(std::vector<std::string>& parametersVector, std::string line)
 {
@@ -55,7 +54,7 @@ void GetParameters(std::vector<std::string>& parametersVector, std::string line)
     if (!params.empty()) parametersVector.push_back(params);
 }
 
-void ExecuteCommand(char* receivedLine, ServerClient& client)
+void ExecuteCommand(char* receivedLine, ServerClient& client, std::unordered_map<std::string, Handler*>& handlersMap)
 {
     std::string line(receivedLine);
 
@@ -65,8 +64,8 @@ void ExecuteCommand(char* receivedLine, ServerClient& client)
     std::vector<std::string> parameters;
     GetParameters(parameters, line);
 
-    if (commandsMap.count(command)) {
-        SendStringResponse(client, commandsMap[command](client, parameters));
+    if (handlersMap.count(command)) {
+        SendStringResponse(client, handlersMap[command]->Handle(parameters));
     } else {
         std::string msg = "Command " + command + " not found.\n";
         client.GetSocket()->Send(msg.c_str(), msg.size());
@@ -75,6 +74,14 @@ void ExecuteCommand(char* receivedLine, ServerClient& client)
 
 void HandleClient(ServerClient& client) {
     std::cout << "Client connected\n";
+
+    std::unordered_map<std::string, Handler*> handlersMap {
+        {"NICK", new NickHandler(client, clients)},
+        {"USER", new UserHandler(client)},
+        {"MOTD", new MOTDHandler()},
+        {"PING", new PingHandler()},
+        {"JOIN", new JoinHandler(client, channels)},
+    };
 
     char buffer[500];
 
@@ -94,10 +101,13 @@ void HandleClient(ServerClient& client) {
 
             clientResponse.erase(0, pos + 2);
 
-            ExecuteCommand((char*)line.c_str(), client);
+            ExecuteCommand((char*)line.c_str(), client, handlersMap);
         }
     }
 
+    for (auto& pair : handlersMap) {
+        delete pair.second;
+    }
 
     std::cout << "Client disconnected\n";
 }
@@ -118,8 +128,6 @@ void server_start()
 {
     //RunAllTests();
 
-    InitWinsock2();
-
     ServerSocket serverSocket(6667);
     serverSocket.StartListening();
 
@@ -138,6 +146,4 @@ void server_start()
         });
         clientThread.detach();
     }
-
-    DeInitWinsock2();
 }

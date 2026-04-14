@@ -9,6 +9,11 @@ struct SocketImpl {
 };
 
 Socket::Socket(int port, char* ipAddress) {
+    if (Socket::s_winsockCount == 0) {
+        WSADATA data;
+        WSAStartup(MAKEWORD(2,2), &data);
+    }
+    Socket::s_winsockCount++;
     m_impl = new SocketImpl;
     m_impl->socket = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in addr{};
@@ -30,6 +35,8 @@ Socket::~Socket() {
     closesocket(m_impl->socket);
     delete m_impl;
     m_impl = nullptr;
+    s_winsockCount--;
+    if (s_winsockCount == 0) WSACleanup();
 }
 
 void* Socket::GetWindowSocket() {

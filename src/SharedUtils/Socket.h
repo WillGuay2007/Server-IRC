@@ -4,6 +4,7 @@ struct SocketImpl;
 
 class Socket {
 private:
+    inline static int s_winsockCount = 0;
     SocketImpl* m_impl;
 protected:
     void* GetWindowSocket();

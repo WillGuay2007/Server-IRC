@@ -23,3 +23,7 @@ bool ServerClient::IsInChannel(std::string channelName) {
     }
     return false;
 }
+
+bool ServerClient::CheckIfIsRegistered() {
+    return (m_nick != "*" && m_username != "*" && m_realName != "*");
+}

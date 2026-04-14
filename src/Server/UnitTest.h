@@ -16,9 +16,3 @@ do { \
 } while(0) \
 
 void RunAllTests();
-void TestHandleJoin();
-void TestHandleMOTD();
-void TestHandleNick();
-void TestHandleUser();
-void TestHandlePing();
-void TestCheckIfUserIsRegistered();
