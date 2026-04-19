@@ -9,6 +9,6 @@ class PingHandler : public Handler {
     public:
         PingHandler() = default;
         ~PingHandler() = default;
-        std::string Handle(std::vector<std::string>& params) override;
+        std::string Handle(const std::vector<std::string>& params) override;
     private:
 };

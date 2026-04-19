@@ -2,7 +2,7 @@
 #include "ServerClient.h"
 #include "Channel.h"
 
-std::string JoinHandler::Handle(std::vector<std::string>& params) {
+std::string JoinHandler::Handle(const std::vector<std::string>& params) {
     if (params.empty()) {
         return GeneratePrefix(ERR_NEEDMOREPARAMS) + m_client.GetNick() + " JOIN " + ":Not enough parameters\n";
     }

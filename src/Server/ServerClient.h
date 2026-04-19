@@ -8,7 +8,6 @@ class Channel;
 class ServerClient {
 public:
     ServerClient(ClientSocket* socket);
-    ServerClient() {};
     ~ServerClient();
 
     ClientSocket* GetSocket() const {return m_socket;}
@@ -23,6 +22,11 @@ public:
     void SetRealName(const std::string& realName) { m_realName = realName; }
     void BroadcastNotify(const std::string& message);
     bool AddChannel(Channel* channel);
+
+    bool operator==(const ServerClient& other) const;
+
+    bool Receive(char* buffer, int size);
+    void Send(std::string response);
 
 private:
     ClientSocket* m_socket;

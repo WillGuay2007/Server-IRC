@@ -1,7 +1,7 @@
 #include "MOTDHandler.h"
 #include "ServerClient.h"
 
-std::string MOTDHandler::Handle(std::vector<std::string>& params) {
+std::string MOTDHandler::Handle(const std::vector<std::string>& params) {
     if (!MOTD.empty()) {
         return MOTD;
     } else {

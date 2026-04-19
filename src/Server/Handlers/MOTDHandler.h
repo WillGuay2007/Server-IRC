@@ -9,6 +9,6 @@ class MOTDHandler : public Handler {
     public:
         MOTDHandler() = default;
         ~MOTDHandler() = default;
-        std::string Handle(std::vector<std::string>& params) override;
+        std::string Handle(const std::vector<std::string>& params) override;
     private:
 };

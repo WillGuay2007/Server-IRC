@@ -1,7 +1,7 @@
-#include "entrypoint.h"
+#include "Server.h"
 
 int main()
 {
-    server_start();
-    return 0;
+    Server server;
+    server.Start();
 }

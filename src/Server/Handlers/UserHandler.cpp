@@ -1,7 +1,7 @@
 #include "UserHandler.h"
 #include "ServerClient.h"
 
-std::string UserHandler::Handle(std::vector<std::string>& params) {
+std::string UserHandler::Handle(const std::vector<std::string>& params) {
     if (params.empty() || params.size() < 4) {
         return GeneratePrefix(ERR_NEEDMOREPARAMS) + m_client.GetNick() + " USER " + ":Not enough parameters\n";
     }
