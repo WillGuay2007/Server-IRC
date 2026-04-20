@@ -13,7 +13,7 @@ public:
 
     bool IsInChannel(std::string channelName);
     bool CheckIfIsRegistered();
-    const std::string GetNick() const { return m_nick;}
+    const std::string& GetNick() const { return m_nick;}
     const std::string& GetUsername() const { return m_username; }
     const std::string& GetRealName() const { return m_realName; }
 
