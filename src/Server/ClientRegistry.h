@@ -3,14 +3,14 @@
 #include <vector>
 #include <string>
 
-class ServerClient;
+class BaseClient;
 
 class ClientRegistry {
 public:
-    void Add(ServerClient* client);
-    void Remove(ServerClient* client);
-    ServerClient* FindClientByNick(const std::string nick);
+    void Add(BaseClient* client);
+    void Remove(BaseClient* client);
+    BaseClient* FindClientByNick(const std::string nick);
     void BroadcastMessage(const std::string message);
 private:
-    std::vector<ServerClient*> m_clients;
+    std::vector<BaseClient*> m_clients;
 };

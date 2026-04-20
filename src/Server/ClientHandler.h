@@ -5,7 +5,7 @@
 
 class ClientRegistry;
 class Channel;
-class ServerClient;
+class ServerClient; //TODO: Make the client handler work with any subclass of BaseClient
 class CommandDispatcher;
 
 class ClientHandler {

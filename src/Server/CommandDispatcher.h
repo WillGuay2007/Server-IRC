@@ -10,9 +10,8 @@ class ServerClient;
 class CommandDispatcher {
 public:
     ~CommandDispatcher();
-    CommandDispatcher(std::unordered_map<std::string, Handler*>& handlers, ServerClient* client) : m_handlers(handlers), m_client(client) {}
-    void Dispatch(const IrcMessage& msg);
+    CommandDispatcher(std::unordered_map<std::string, Handler*>& handlers) : m_handlers(handlers) {}
+    bool Dispatch(const IrcMessage& msg);
 private:
     std::unordered_map<std::string, Handler*> m_handlers;
-    ServerClient* m_client;
 };

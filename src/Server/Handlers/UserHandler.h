@@ -3,13 +3,9 @@
 #include "handler.h"
 #include <vector>
 
-class ServerClient;
-
 class UserHandler : public Handler {
     public:
-        UserHandler(ServerClient& client) : m_client(client) {};
-        std::string Handle(const std::vector<std::string>& params) override;
+        void Handle(const std::vector<std::string>& params) override;
+        UserHandler(BaseClient& _client) : Handler(_client) {};
         ~UserHandler() = default;
-    private:
-    ServerClient& m_client;
 };

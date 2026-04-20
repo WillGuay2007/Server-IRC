@@ -3,12 +3,9 @@
 #include "handler.h"
 #include <vector>
 
-class ServerClient;
-
 class MOTDHandler : public Handler {
     public:
-        MOTDHandler() = default;
+        MOTDHandler(BaseClient& _client) : Handler(_client) {}
         ~MOTDHandler() = default;
-        std::string Handle(const std::vector<std::string>& params) override;
-    private:
+        void Handle(const std::vector<std::string>& params) override;
 };

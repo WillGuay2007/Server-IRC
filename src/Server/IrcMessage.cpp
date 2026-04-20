@@ -25,6 +25,7 @@ namespace
         lineToParse.erase(0, pos + 1);
     }
 
+    //MAIN FUNCTION
     std::vector<std::string> ParseParameters(std::string lineToParse) {
         size_t pos = 0;
         std::vector<std::string> parametersVector;

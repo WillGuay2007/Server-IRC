@@ -1,9 +1,10 @@
 #include "PingHandler.h"
 #include "ServerClient.h"
 
-std::string PingHandler::Handle(const std::vector<std::string>& params) {
+void PingHandler::Handle(const std::vector<std::string>& params) {
     if (params.empty()) {
-        return "PONG\n";
+        client.Send("PONG\n");
+        return;
     }
-    return "PONG " + params[0] + "\n";
+    client.Send("PONG " + params[0] + "\n");
 }   

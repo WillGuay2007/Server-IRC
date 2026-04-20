@@ -2,20 +2,23 @@
 #include "ServerClient.h"
 #include "Channel.h"
 
-std::string JoinHandler::Handle(const std::vector<std::string>& params) {
+void JoinHandler::Handle(const std::vector<std::string>& params) {
     if (params.empty()) {
-        return GeneratePrefix(ERR_NEEDMOREPARAMS) + m_client.GetNick() + " JOIN " + ":Not enough parameters\n";
+        client.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + client.GetNick() + " JOIN " + ":Not enough parameters\n");
+        return;
     }
     std::string channelName = params[0];
-    if (m_client.IsInChannel(channelName)) {
-        return "You are already a member of channel: " + channelName +  "\n";
+    if (client.IsInChannel(channelName)) {
+        client.Send("You are already a member of channel: " + channelName +  "\n");
+        return;
     }
     for (int i = 0; i < m_channels.size(); i++) {
         if (m_channels[i]->GetName() == channelName) {
-            m_channels[i]->AddMember(&m_client);
-            m_client.AddChannel(m_channels[i]);
-            return "Executing command: JOIN\nJoining " + channelName + " channel\n";
+            m_channels[i]->AddMember(&client);
+            client.AddChannel(m_channels[i]);
+            client.Send("Executing command: JOIN\nJoining " + channelName + " channel\n");
+            return;
         }
     }
-    return "Channel " + params[0] + " is invalid.\n";
+    client.Send("Channel " + params[0] + " is invalid.\n");
 }

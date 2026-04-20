@@ -4,15 +4,13 @@
 #include "ClientRegistry.h"
 #include <vector>
 
-class ServerClient;
 class ClientRegistry;
 
 class NickHandler : public Handler {
     public:
-        NickHandler(ServerClient& client, ClientRegistry& clients) : m_client(client), m_clients(clients) {}
-        std::string Handle(const std::vector<std::string>& params) override;
+        void Handle(const std::vector<std::string>& params) override;
+        NickHandler(BaseClient& _client, ClientRegistry& clients) : Handler(_client), m_clients(clients) {}
         ~NickHandler() = default;
     private:
-    ServerClient& m_client;
     ClientRegistry& m_clients;
 };

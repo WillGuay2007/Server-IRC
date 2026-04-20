@@ -1,23 +1,27 @@
 #include "UserHandler.h"
 #include "ServerClient.h"
 
-std::string UserHandler::Handle(const std::vector<std::string>& params) {
+void UserHandler::Handle(const std::vector<std::string>& params) {
     if (params.empty() || params.size() < 4) {
-        return GeneratePrefix(ERR_NEEDMOREPARAMS) + m_client.GetNick() + " USER " + ":Not enough parameters\n";
+        client.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n");
+        return;
     }
-    if (m_client.GetRealName() != "*" || m_client.GetUsername() != "*") {
-        return GeneratePrefix(ERR_ALREADYREGISTERED) + m_client.GetNick() + " USER " + ":You may not re-register.\n";
+    if (client.GetRealName() != "*" || client.GetUsername() != "*") {
+        client.Send(GeneratePrefix(ERR_ALREADYREGISTERED) + client.GetNick() + " USER " + ":You may not re-register.\n");
+        return;
     }
     std::string username = params[0];
     std::string realName = params[3];
     if (realName.empty() || username.empty()) {
-        return GeneratePrefix(ERR_NEEDMOREPARAMS) + m_client.GetNick() + " USER " + ":Not enough parameters\n";
+        client.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n");
+        return;
     }
-    m_client.SetUsername(username);
-    m_client.SetRealName(realName);
-    if (m_client.CheckIfIsRegistered()) {
-        return GeneratePrefix(RPL_WELCOME) + m_client.GetNick() + " :Welcome to " + SERVER_NAME + "!\n";
+    client.SetUsername(username);
+    client.SetRealName(realName);
+    if (client.CheckIfIsRegistered()) {
+        client.Send(GeneratePrefix(RPL_WELCOME) + client.GetNick() + " :Welcome to " + SERVER_NAME + "!\n");
+        return;
     } else {
-         return "Succesfully set your USER. Please set your NICK now.\n";
+        client.Send("Succesfully set your USER. Please set your NICK now.\n");
     }
 }

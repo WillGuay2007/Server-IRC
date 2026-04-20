@@ -3,12 +3,10 @@
 #include "handler.h"
 #include <vector>
 
-class ServerClient;
-
 class PingHandler : public Handler {
     public:
-        PingHandler() = default;
+        PingHandler(BaseClient& _client) : Handler(_client) {}
         ~PingHandler() = default;
-        std::string Handle(const std::vector<std::string>& params) override;
+        void Handle(const std::vector<std::string>& params) override;
     private:
 };

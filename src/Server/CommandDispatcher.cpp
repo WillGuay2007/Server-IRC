@@ -12,10 +12,10 @@ CommandDispatcher::~CommandDispatcher() {
     }
 }
 
-void CommandDispatcher::Dispatch(const IrcMessage& msg) {
+bool CommandDispatcher::Dispatch(const IrcMessage& msg) {
     if (m_handlers.count(msg.GetCommand())) {
-        m_client->Send(m_handlers[msg.GetCommand()]->Handle(msg.GetParams()));
-    } else {
-        m_client->Send("Command " + msg.GetCommand() + " not found.\n");
-    }
+        m_handlers[msg.GetCommand()]->Handle(msg.GetParams());
+        return true;
+    } 
+    return false;
 }

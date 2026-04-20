@@ -38,7 +38,9 @@ void ClientHandler::Handle() {
 
             IrcMessage msg = IrcMessage::Parse(line);
 
-            m_commandDispatcher->Dispatch(msg);
+            bool success = m_commandDispatcher->Dispatch(msg);
+            if (!success) m_client.Send("Command " + msg.GetCommand() + " not found.\n");
+
         }
     }
 
@@ -49,10 +51,10 @@ void ClientHandler::InitCommandDispatcher() {
     std::unordered_map<std::string, Handler*> handlersMap {
         {"NICK", new NickHandler(m_client, m_registry)},
         {"USER", new UserHandler(m_client)},
-        {"MOTD", new MOTDHandler()},
-        {"PING", new PingHandler()},
+        {"MOTD", new MOTDHandler(m_client)},
+        {"PING", new PingHandler(m_client)},
         {"JOIN", new JoinHandler(m_client, m_channels)},
     };
 
-    m_commandDispatcher = new CommandDispatcher(handlersMap, &m_client);
+    m_commandDispatcher = new CommandDispatcher(handlersMap);
 }
