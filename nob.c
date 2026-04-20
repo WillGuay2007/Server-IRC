@@ -5,22 +5,21 @@
 
 #include "noblib_rlimgui.c"
 
+//Je les forward declare
+void CompileDir(Cmd *cmd, const char* dir);
+void build_server(void);
+void build_client(File_Paths* o_files);
+
 void addSharedSources(Cmd *cmd) {
     cmd_append(cmd, "-Isrc/SharedUtils");
-    cmd_append(cmd, "src/SharedUtils/Socket.cpp");
-    cmd_append(cmd, "src/SharedUtils/ClientSocket.cpp");
-    cmd_append(cmd, "src/SharedUtils/ServerSocket.cpp");
-    cmd_append(cmd, "src/SharedUtils/Winsock2Init.cpp");
+    
+    CompileDir(cmd, "src/SharedUtils/");
 }
 
 void addSharedLibs(Cmd *cmd) {
     cmd_append(cmd, "-lws2_32");
 }
 
-
-
-void build_server(void);
-void build_client(File_Paths* o_files);
 int main(int argc, char** argv)
 {
     NOB_GO_REBUILD_URSELF_PLUS(argc, argv, RAYLIB_FILE);
@@ -60,10 +59,12 @@ void build_server(void)
     nob_cc(&cmd);
     cmd_append(&cmd, "-ggdb3");
     
-    cmd_append(&cmd, "src/Server/main.cpp");
-    cmd_append(&cmd, "src/Server/entrypoint.cpp");
-    cmd_append(&cmd, "src/Server/ServerCommands.cpp");
-    
+    cmd_append(&cmd, "-Isrc/Server");
+    cmd_append(&cmd, "-Isrc/Server/Handlers");
+
+
+    CompileDir(&cmd, "src/Server/");
+    CompileDir(&cmd, "src/Server/Handlers/");
     
     addSharedSources(&cmd);
     
@@ -79,10 +80,10 @@ void build_server(void)
 void build_client(File_Paths* o_files)
 {
     Cmd cmd = {0};
-    
+
     nob_cc(&cmd);
     cmd_append(&cmd, "-ggdb3");
-    
+
     cmd_append(&cmd, "src/Client/main.cpp");
     cmd_append(&cmd, "src/Client/entrypoint.cpp");
 
@@ -104,4 +105,15 @@ void build_client(File_Paths* o_files)
     cmd_append(&cmd, RLIMGUI_LFLAGS);
 
     if (!cmd_run_sync_and_reset(&cmd)) exit(1);
+}
+
+void CompileDir(Cmd *cmd, const char* dir) {
+    File_Paths dirFiles = {0};
+    read_entire_dir(dir, &dirFiles);
+    for (size_t i = 0; i < dirFiles.count; i++) {
+        const char *ext = temp_file_ext(dirFiles.items[i]);
+        if (ext && strcmp(ext, ".cpp") == 0) {
+            cmd_append(cmd, temp_sprintf("%s%s", dir, dirFiles.items[i]));
+        }
+    }
 }

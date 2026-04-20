@@ -1,6 +1,5 @@
 #include "entrypoint.h"
 #include "ClientSocket.h"
-#include "Winsock2Init.h"
 #include <string>
 #include <iostream>
 #include "raylib.h"
@@ -10,9 +9,7 @@
 void client_start()
 {
     
-InitWinsock2();
-
-    ClientSocket* client = new ClientSocket(6667);
+    ClientSocket* client = new ClientSocket(6667, (char*)"127.0.0.1");
 
     client->Connect();
 
@@ -49,7 +46,7 @@ InitWinsock2();
                 std::string msg = std::string(inputBuffer) + "\r\n";
                 client->Send(msg.c_str(), (int)msg.size());
                 if (client->WaitForResponse(recvBuffer, sizeof(recvBuffer))) {
-                    std::cout << "Server says: " << recvBuffer << std::endl;
+                    std::cout << "Server: " << recvBuffer << std::endl;
                 }
                 inputBuffer[0] = '\0';
             }
@@ -63,5 +60,4 @@ InitWinsock2();
     delete client;
     rlImGuiShutdown();
     CloseWindow();
-    DeInitWinsock2();
 }

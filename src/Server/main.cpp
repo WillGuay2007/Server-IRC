@@ -1,7 +1,9 @@
-#include "entrypoint.h"
+#include "Server.h"
+#include "UnitTest.h"
 
 int main()
 {
-    server_start();
-    return 0;
+    RunAllTests();
+    Server server;
+    server.Start();
 }
