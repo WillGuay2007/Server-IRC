@@ -15,9 +15,12 @@ void ClientSocket::Connect() {
 }
 
 void ClientSocket::Send(const char* buffer, int buffersize) {
-    if (send(*(SOCKET*)GetWindowSocket(), buffer, buffersize, 0) == SOCKET_ERROR) {
-        std::cout << "SOCKET SEND ERROR\n";
-    };
+    int result = send(*(SOCKET*)GetWindowSocket(), buffer, buffersize, 0);
+
+    if (result == SOCKET_ERROR)
+    {
+        std::cout << "SOCKET SEND ERROR: " << WSAGetLastError() << std::endl;
+    }
 }
 
 bool ClientSocket::WaitForResponse(char* buffer, int buffersize) {

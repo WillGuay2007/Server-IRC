@@ -84,6 +84,7 @@ void build_client(File_Paths* o_files)
     
     cmd_append(&cmd, "src/Client/main.cpp");
     cmd_append(&cmd, "src/Client/entrypoint.cpp");
+    cmd_append(&cmd, "src/Client/clientIRC.cpp");
 
 
     cmd_append(&cmd, RAYLIB_INCLUDES);
