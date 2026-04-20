@@ -6,7 +6,7 @@ ServerSocket::ServerSocket(int address) : Socket(address) {}
 ServerSocket::ServerSocket(void* windowSocket) : Socket(windowSocket) {}
 
 void ServerSocket::StartListening() {
-    bind(*(SOCKET*)GetWindowSocket(), (sockaddr*)GetAddress(), sizeof(*(sockaddr_in*)GetAddress()));
+    bind(*(SOCKET*)GetWindowSocket(), (sockaddr*)GetPort(), sizeof(*(sockaddr_in*)GetPort()));
     listen(*(SOCKET*)GetWindowSocket(), 5);
 }
 

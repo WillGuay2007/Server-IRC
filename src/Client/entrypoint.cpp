@@ -89,5 +89,4 @@ void client_start()
 
     rlImGuiShutdown();
     CloseWindow();
-    DeInitWinsock2();
 }
