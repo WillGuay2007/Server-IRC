@@ -5,8 +5,7 @@
 
 class PingHandler : public Handler {
     public:
-        PingHandler(BaseClient& _client) : Handler(_client) {}
         ~PingHandler() = default;
-        void Handle(const std::vector<std::string>& params) override;
+        void Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) override;
     private:
 };

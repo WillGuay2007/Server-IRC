@@ -12,9 +12,9 @@ CommandDispatcher::~CommandDispatcher() {
     }
 }
 
-bool CommandDispatcher::Dispatch(const IrcMessage& msg) {
+bool CommandDispatcher::Dispatch(const IrcMessage& msg, BaseClient& clientToHandle) {
     if (m_handlers.count(msg.GetCommand())) {
-        m_handlers[msg.GetCommand()]->Handle(msg.GetParams());
+        m_handlers[msg.GetCommand()]->Handle(msg.GetParams(), clientToHandle);
         return true;
     } 
     return false;

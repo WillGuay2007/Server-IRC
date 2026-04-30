@@ -5,7 +5,6 @@
 
 class UserHandler : public Handler {
     public:
-        void Handle(const std::vector<std::string>& params) override;
-        UserHandler(BaseClient& _client) : Handler(_client) {};
+        void Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) override;
         ~UserHandler() = default;
 };

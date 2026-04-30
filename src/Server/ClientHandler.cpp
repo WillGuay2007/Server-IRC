@@ -19,14 +19,11 @@ ClientHandler::~ClientHandler() {
 void ClientHandler::Handle() {
     std::cout << "Client connected\n";
 
-    char buffer[500];
+    char buffer[1500];
 
     while (true)
     {
-        if (!m_client.Receive(buffer, sizeof(buffer)))
-        {
-            break; //Déconnecter le client si ca fail.
-        }
+        if (!m_client.Receive(buffer, sizeof(buffer))) break;
 
         std::string clientResponse(buffer);
 
@@ -34,11 +31,15 @@ void ClientHandler::Handle() {
         while ((pos = clientResponse.find("\r\n")) != std::string::npos)
         {
             std::string line = clientResponse.substr(0, pos);
+
+            //Pour le debug, mettre en commentaire si on utilise pas.
+            std::cout << line << std::endl;
+
             clientResponse.erase(0, pos + 2);
 
             IrcMessage msg = IrcMessage::Parse(line);
 
-            bool success = m_commandDispatcher->Dispatch(msg);
+            bool success = m_commandDispatcher->Dispatch(msg, m_client);
             if (!success) m_client.Send("Command " + msg.GetCommand() + " not found.\n");
 
         }
@@ -49,11 +50,11 @@ void ClientHandler::Handle() {
 
 void ClientHandler::InitCommandDispatcher() {
     std::unordered_map<std::string, Handler*> handlersMap {
-        {"NICK", new NickHandler(m_client, m_registry)},
-        {"USER", new UserHandler(m_client)},
-        {"MOTD", new MOTDHandler(m_client)},
-        {"PING", new PingHandler(m_client)},
-        {"JOIN", new JoinHandler(m_client, m_channels)},
+        {"NICK", new NickHandler(m_registry)},
+        {"USER", new UserHandler()},
+        {"MOTD", new MOTDHandler()},
+        {"PING", new PingHandler()},
+        {"JOIN", new JoinHandler(m_channels)},
     };
 
     m_commandDispatcher = new CommandDispatcher(handlersMap);

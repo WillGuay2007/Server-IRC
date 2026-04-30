@@ -20,7 +20,7 @@ void Server::Start() {
     {
         ClientSocket* clientSocket = serverSocket.WaitForConnection();
         ServerClient* client = new ServerClient(clientSocket);
-        if (!client) continue;
+        if (clientSocket == nullptr) continue;
         m_clientRegistry.Add(client);
         std::thread clientThread([client, this]() {
             ClientHandler clientHandler = ClientHandler(*client, m_clientRegistry, m_channels);

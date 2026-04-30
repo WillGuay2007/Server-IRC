@@ -8,10 +8,9 @@
 
 class Handler {
 public:
-    virtual void Handle(const std::vector<std::string>& params) = 0;
-    Handler(BaseClient& client) : client(client) {}
+    virtual void Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) = 0;
+    Handler() = default;
     virtual ~Handler() = default;
     protected:
     std::string GeneratePrefix(EServerResponse response);
-    BaseClient& client;
 };

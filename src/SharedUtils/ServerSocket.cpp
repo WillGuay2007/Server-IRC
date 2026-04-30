@@ -11,10 +11,11 @@ void ServerSocket::StartListening() {
 }
 
 ClientSocket* ServerSocket::WaitForConnection() {
-    SOCKET clientWindowSocket = accept(*(SOCKET*)GetWindowSocket(), nullptr, nullptr);
-    if (clientWindowSocket == INVALID_SOCKET) {
+    SOCKET* clientWindowSocket = new SOCKET(accept(*(SOCKET*)GetWindowSocket(), nullptr, nullptr));
+    if (*clientWindowSocket == INVALID_SOCKET) {
+        delete clientWindowSocket;
         std::cout << "accept failed\n";
         return nullptr;
     }
-    return new ClientSocket(&clientWindowSocket);
+    return new ClientSocket(clientWindowSocket);
 }
