@@ -8,7 +8,7 @@ public:
     void Start();
 private:
     std::vector<Channel*> m_channels {
-    new Channel("#General")
+        new Channel("#General")
     };
     ClientRegistry m_clientRegistry;
 };
