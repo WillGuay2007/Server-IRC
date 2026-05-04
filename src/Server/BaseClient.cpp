@@ -1,5 +1,6 @@
 #include "BaseClient.h"
 #include "Channel.h"
+#include "ServerUtils.h"
 
 bool BaseClient::IsInChannel(std::string channelName) {
     for (int i = 0; i < m_channels.size(); i++) {
@@ -10,6 +11,13 @@ bool BaseClient::IsInChannel(std::string channelName) {
 
 bool BaseClient::CheckIfIsRegistered() {
     return (m_nick != "*" && m_username != "*" && m_realName != "*");
+}
+
+void BaseClient::Register() {
+    Send(GeneratePrefix(RPL_WELCOME) + GetNick() + " :Welcome to the " + SERVER_NAME + " Network, " + GetNick() + "!\n");
+    Send(GeneratePrefix(RPL_YOURHOST) + GetNick() + " :Your host is " + SERVER_NAME + " running version " + SERVER_VERSION + "\n");
+    Send(GeneratePrefix(RPL_CREATED) + GetNick() + " :This server was created on " + SERVER_START_TIME + "\n");
+    Send(GeneratePrefix(RPL_MYINFO) + GetNick() + " " + SERVER_NAME + " " + SERVER_VERSION + "\n");
 }
 
 bool BaseClient::AddChannel(Channel* channel) {

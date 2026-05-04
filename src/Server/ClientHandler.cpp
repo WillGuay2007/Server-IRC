@@ -12,14 +12,10 @@
 #include "PingHandler.h"
 #include "MOTDHandler.h"
 
-ClientHandler::~ClientHandler() {
-    delete m_commandDispatcher;
-}
-
 void ClientHandler::Handle() {
     std::cout << "Client connected\n";
 
-    char buffer[1500];
+    char buffer[500];
 
     while (true)
     {
@@ -39,23 +35,11 @@ void ClientHandler::Handle() {
 
             IrcMessage msg = IrcMessage::Parse(line);
 
-            bool success = m_commandDispatcher->Dispatch(msg, m_client);
+            bool success = m_commandDispatcher.Dispatch(msg, m_client);
             if (!success) m_client.Send("Command " + msg.GetCommand() + " not found.\n");
 
         }
     }
 
     std::cout << "Client disconnected\n";
-}
-
-void ClientHandler::InitCommandDispatcher() {
-    std::unordered_map<std::string, Handler*> handlersMap {
-        {"NICK", new NickHandler(m_registry)},
-        {"USER", new UserHandler()},
-        {"MOTD", new MOTDHandler()},
-        {"PING", new PingHandler()},
-        {"JOIN", new JoinHandler(m_channels)},
-    };
-
-    m_commandDispatcher = new CommandDispatcher(handlersMap);
 }

@@ -10,6 +10,12 @@
 #include "UnitTest.h"
 #include "ClientHandler.h"
 
+#include "JoinHandler.h"
+#include "NickHandler.h"
+#include "UserHandler.h"
+#include "PingHandler.h"
+#include "MOTDHandler.h"
+
 void Server::Start() {
     ServerSocket serverSocket(6667);
     serverSocket.StartListening();
@@ -23,11 +29,23 @@ void Server::Start() {
         if (clientSocket == nullptr) continue;
         m_clientRegistry.Add(client);
         std::thread clientThread([client, this]() {
-            ClientHandler clientHandler = ClientHandler(*client, m_clientRegistry, m_channels);
+            ClientHandler clientHandler = ClientHandler(*client, m_clientRegistry, m_channels, m_commandDispatcher);
             clientHandler.Handle();
             m_clientRegistry.Remove(client);
             delete client;
         });
         clientThread.detach();
     }
+}
+
+CommandDispatcher Server::CreateCommandDispatcher() {
+     std::unordered_map<std::string, Handler*> handlersMap {
+        {"NICK", new NickHandler(m_clientRegistry)},
+        {"USER", new UserHandler()},
+        {"MOTD", new MOTDHandler()},
+        {"PING", new PingHandler()},
+        {"JOIN", new JoinHandler(m_channels)},
+    };
+
+    return CommandDispatcher(handlersMap);
 }

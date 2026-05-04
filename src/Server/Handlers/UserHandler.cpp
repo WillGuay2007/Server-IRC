@@ -19,7 +19,7 @@ void UserHandler::Handle(const std::vector<std::string>& params, BaseClient& cli
     clientToHandle.SetUsername(username);
     clientToHandle.SetRealName(realName);
     if (clientToHandle.CheckIfIsRegistered()) {
-        clientToHandle.Send(GeneratePrefix(RPL_WELCOME) + clientToHandle.GetNick() + " :Welcome to " + SERVER_NAME + "!\n");
+        clientToHandle.Register();
         return;
     } else {
         clientToHandle.Send("Succesfully set your USER. Please set your NICK now.\n");

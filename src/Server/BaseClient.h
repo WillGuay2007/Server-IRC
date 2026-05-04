@@ -22,6 +22,8 @@ public:
     void SetRealName(const std::string& realName) { m_realName = realName; }
     bool AddChannel(Channel* channel);
 
+    void Register();
+
     virtual void Send(const std::string response) = 0;
 
 private:
