@@ -15,6 +15,7 @@ CommandDispatcher::~CommandDispatcher() {
 bool CommandDispatcher::Dispatch(const IrcMessage& msg, BaseClient& clientToHandle) {
     if (m_handlers.count(msg.GetCommand())) {
         m_handlers[msg.GetCommand()]->Handle(msg.GetParams(), clientToHandle);
+        std::cout << "Executing command: " + msg.GetCommand() + "\n";
         return true;
     } 
     return false;

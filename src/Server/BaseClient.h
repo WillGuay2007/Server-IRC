@@ -11,7 +11,6 @@ public:
     BaseClient() = default;
     virtual ~BaseClient() = default;
 
-    bool IsInChannel(std::string channelName);
     bool CheckIfIsRegistered();
     const std::string& GetNick() const { return m_nick;}
     const std::string& GetUsername() const { return m_username; }
@@ -21,6 +20,8 @@ public:
     void SetUsername(const std::string& username) { m_username = username; }
     void SetRealName(const std::string& realName) { m_realName = realName; }
     bool AddChannel(Channel* channel);
+
+    bool operator==(const BaseClient& other) const;
 
     void Register();
 

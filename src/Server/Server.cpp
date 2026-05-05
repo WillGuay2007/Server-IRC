@@ -15,6 +15,7 @@
 #include "UserHandler.h"
 #include "PingHandler.h"
 #include "MOTDHandler.h"
+#include "PrivMsgHandler.h"
 
 void Server::Start() {
     ServerSocket serverSocket(6667);
@@ -29,7 +30,7 @@ void Server::Start() {
         if (clientSocket == nullptr) continue;
         m_clientRegistry.Add(client);
         std::thread clientThread([client, this]() {
-            ClientHandler clientHandler = ClientHandler(*client, m_clientRegistry, m_channels, m_commandDispatcher);
+            ClientHandler clientHandler = ClientHandler(*client, m_commandDispatcher);
             clientHandler.Handle();
             m_clientRegistry.Remove(client);
             delete client;
@@ -44,7 +45,8 @@ CommandDispatcher Server::CreateCommandDispatcher() {
         {"USER", new UserHandler()},
         {"MOTD", new MOTDHandler()},
         {"PING", new PingHandler()},
-        {"JOIN", new JoinHandler(m_channels)},
+        {"JOIN", new JoinHandler(m_channelRegistry)},
+        {"PRIVMSG", new PrivMsgHandler(m_clientRegistry, m_channelRegistry)}
     };
 
     return CommandDispatcher(handlersMap);

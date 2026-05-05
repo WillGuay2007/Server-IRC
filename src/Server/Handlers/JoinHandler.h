@@ -3,13 +3,13 @@
 #include "handler.h"
 #include <vector>
 
-class Channel;
+#include "ChannelRegistry.h"
 
 class JoinHandler : public Handler {
     public:
         void Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) override;
-        JoinHandler(std::vector<Channel*>& channels) : m_channels(channels) {}
+        JoinHandler(ChannelRegistry& channelRegistry) : m_channelRegistry(channelRegistry) {}
         ~JoinHandler() = default;
     private:
-    std::vector<Channel*>& m_channels;
+    ChannelRegistry& m_channelRegistry;
 };

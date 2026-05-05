@@ -2,6 +2,7 @@
 
 #include "Channel.h"
 #include "ClientRegistry.h"
+#include "ChannelRegistry.h"
 #include "CommandDispatcher.h"
 
 class Server {
@@ -10,7 +11,7 @@ public:
     void Start();
 private:
     CommandDispatcher CreateCommandDispatcher();
-    std::vector<Channel*> m_channels {
+    ChannelRegistry m_channelRegistry {
         new Channel("#General")
     };
     ClientRegistry m_clientRegistry;

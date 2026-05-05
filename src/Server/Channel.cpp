@@ -5,3 +5,10 @@ void Channel::NotifyMembers(std::string message) {
         m_members[i]->Send(message);
     }
 }
+
+bool Channel::HasMember(BaseClient* memberToCheck) {
+    for (BaseClient* member : m_members) {
+        if (memberToCheck == member) return true;
+    }
+    return false;
+}
