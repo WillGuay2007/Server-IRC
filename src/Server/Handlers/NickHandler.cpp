@@ -13,10 +13,9 @@ void NickHandler::Handle(const std::vector<std::string>& params, BaseClient& cli
     }
     
     clientToHandle.SetNick(chosenNick);
-    if (clientToHandle.CheckIfIsRegistered()) {
+    clientToHandle.Send("Succesfully set your nick to: " + clientToHandle.GetNick() + "\n");
+    if (clientToHandle.CanRegister()) {
         clientToHandle.Register();
         return;
-    } else {
-        clientToHandle.Send("Succesfully set your NICK. Please set your USER now.\n");
     }
 }

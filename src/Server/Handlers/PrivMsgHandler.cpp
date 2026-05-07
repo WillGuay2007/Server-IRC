@@ -3,13 +3,18 @@
 
 void PrivMsgHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
 
+    if (clientToHandle.HasNickAndUser() == false) {
+        clientToHandle.Send(GeneratePrefix(ERR_NOTREGISTERED) + " " + clientToHandle.GetNick() + " Must register first with USER and NICK before sending any message.");
+        return;
+    }
+
     if (params.size() < 2) {
         clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " PRIVMSG " + ":Not enough parameters\n");
         return;
     }
 
-    std::string messageToSend = params[params.size() - 1];
     std::string targets = params[0];
+    std::string messageToSend = params[1];
     std::vector<std::string> targetsVector;
 
     size_t pos = 0;

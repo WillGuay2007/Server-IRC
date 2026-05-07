@@ -16,6 +16,8 @@
 #include "PingHandler.h"
 #include "MOTDHandler.h"
 #include "PrivMsgHandler.h"
+#include "PartHandler.h"
+#include "NamesHandler.h"
 
 void Server::Start() {
     ServerSocket serverSocket(6667);
@@ -46,7 +48,9 @@ CommandDispatcher Server::CreateCommandDispatcher() {
         {"MOTD", new MOTDHandler()},
         {"PING", new PingHandler()},
         {"JOIN", new JoinHandler(m_channelRegistry)},
-        {"PRIVMSG", new PrivMsgHandler(m_clientRegistry, m_channelRegistry)}
+        {"PRIVMSG", new PrivMsgHandler(m_clientRegistry, m_channelRegistry)},
+        {"PART", new PartHandler(m_channelRegistry)},
+        {"NAMES", new NamesHandler(m_channelRegistry)}
     };
 
     return CommandDispatcher(handlersMap);

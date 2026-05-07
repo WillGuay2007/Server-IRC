@@ -11,7 +11,8 @@ public:
     BaseClient() = default;
     virtual ~BaseClient() = default;
 
-    bool CheckIfIsRegistered();
+    bool HasNickAndUser();
+    bool CanRegister();
     const std::string& GetNick() const { return m_nick;}
     const std::string& GetUsername() const { return m_username; }
     const std::string& GetRealName() const { return m_realName; }
@@ -28,6 +29,7 @@ public:
     virtual void Send(const std::string response) = 0;
 
 private:
+    bool m_hasRegisteredOnce = false;
     std::string m_nick = "*";
     std::string m_username = "*";
     std::string m_realName = "*";

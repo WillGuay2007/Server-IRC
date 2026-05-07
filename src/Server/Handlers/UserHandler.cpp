@@ -16,12 +16,13 @@ void UserHandler::Handle(const std::vector<std::string>& params, BaseClient& cli
         clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " USER " + ":Not enough parameters\n");
         return;
     }
-    clientToHandle.SetUsername(username);
-    clientToHandle.SetRealName(realName);
-    if (clientToHandle.CheckIfIsRegistered()) {
-        clientToHandle.Register();
-        return;
+
+    if (clientToHandle.HasNickAndUser()){
+        clientToHandle.Send(GeneratePrefix(ERR_ALREADYREGISTERED) + "you already registered.\n");
     } else {
-        clientToHandle.Send("Succesfully set your USER. Please set your NICK now.\n");
+        clientToHandle.SetUsername(username);
+        clientToHandle.SetRealName(realName);
+        clientToHandle.Send("Succesfully set your USER!\n");
+        if (clientToHandle.CanRegister())   clientToHandle.Register();
     }
 }

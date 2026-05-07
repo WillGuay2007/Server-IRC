@@ -1,8 +1,13 @@
 #include "Channel.h"
 
-void Channel::NotifyMembers(std::string message) {
-    for (int i = 0; i < m_members.size(); i++) {
-        m_members[i]->Send(message);
+void Channel::RemoveMember(BaseClient* memberToRemove) {
+    for ( BaseClient* member : m_members) {
+        for (auto it = m_members.begin(); it != m_members.end(); it++) {
+            if (*it == memberToRemove) {
+                m_members.erase(it);
+                return;
+            }
+        }
     }
 }
 

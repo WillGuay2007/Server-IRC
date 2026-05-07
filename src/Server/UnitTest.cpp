@@ -56,7 +56,6 @@ void TestUser() {
     TEST(client.GetLastSentResponse().find("461") != std::string::npos);
 
     handler.Handle({"user1", "0", "*", "Real Name"}, client);
-    TEST(client.GetLastSentResponse().find("NICK") != std::string::npos);
 
     handler.Handle({"user1", "0", "*", "Real Name"}, client);
     TEST(client.GetLastSentResponse().find("462") != std::string::npos);
