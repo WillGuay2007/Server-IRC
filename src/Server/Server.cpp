@@ -18,6 +18,7 @@
 #include "PrivMsgHandler.h"
 #include "PartHandler.h"
 #include "NamesHandler.h"
+#include "NoticeHandler.h"
 
 void Server::Start() {
     ServerSocket serverSocket(6667);
@@ -28,8 +29,8 @@ void Server::Start() {
     while (true)
     {
         ClientSocket* clientSocket = serverSocket.WaitForConnection();
-        ServerClient* client = new ServerClient(clientSocket);
         if (clientSocket == nullptr) continue;
+        ServerClient* client = new ServerClient(clientSocket);
         m_clientRegistry.Add(client);
         std::thread clientThread([client, this]() {
             ClientHandler clientHandler = ClientHandler(*client, m_commandDispatcher);
@@ -50,7 +51,8 @@ CommandDispatcher Server::CreateCommandDispatcher() {
         {"JOIN", new JoinHandler(m_channelRegistry)},
         {"PRIVMSG", new PrivMsgHandler(m_clientRegistry, m_channelRegistry)},
         {"PART", new PartHandler(m_channelRegistry)},
-        {"NAMES", new NamesHandler(m_channelRegistry)}
+        {"NAMES", new NamesHandler(m_channelRegistry)},
+        {"NOTICE", new NoticeHandler(m_clientRegistry, m_channelRegistry)},
     };
 
     return CommandDispatcher(handlersMap);

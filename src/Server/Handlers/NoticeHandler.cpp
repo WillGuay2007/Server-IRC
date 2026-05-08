@@ -1,16 +1,16 @@
-#include "PrivMsgHandler.h"
+#include "NoticeHandler.h"
 #include "Channel.h"
 
-void PrivMsgHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
+//Code dupliqué avec privMsg, j'aurai pu refactor mais pas ma priorité
+void NoticeHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
 
     if (clientToHandle.HasNickAndUser() == false) {
-        //Le critere 8 de la grille si j'ai bien compris
         clientToHandle.Send(GeneratePrefix(ERR_NOTREGISTERED) + " " + clientToHandle.GetNick() + " Must register first with USER and NICK before sending any message.");
         return;
     }
 
     if (params.size() < 2) {
-        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " PRIVMSG " + ":Not enough parameters\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " NOTICE " + ":Not enough parameters\n");
         return;
     }
 
@@ -32,16 +32,13 @@ void PrivMsgHandler::Handle(const std::vector<std::string>& params, BaseClient& 
         
         if (channel != nullptr) {
             if (channel->HasMember(&clientToHandle)) {
-                channel->NotifyMembers(":" + clientToHandle.GetNick() + " PRIVMSG " + target + " :" + messageToSend + "\n", &clientToHandle);
-            }
-            else {
-                clientToHandle.Send(GeneratePrefix(ERR_CANNOTSENDTOCHAN) + clientToHandle.GetNick() + " " + channel->GetName() + " :Cannot send to channel.\n");
+                channel->NotifyMembers(":" + clientToHandle.GetNick() + " NOTICE " + target + " :" + messageToSend + "\n", &clientToHandle);
             }
             continue;
         }
 
         if (client != nullptr) {
-            client->Send(":" + clientToHandle.GetNick() + " PRIVMSG " + target + " :" + messageToSend + "\n");
+            client->Send(":" + clientToHandle.GetNick() + " NOTICE " + target + " :" + messageToSend + "\n");
             continue;
         }
 

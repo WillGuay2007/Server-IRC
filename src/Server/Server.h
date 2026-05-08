@@ -12,7 +12,7 @@ public:
 private:
     CommandDispatcher CreateCommandDispatcher();
     ChannelRegistry m_channelRegistry {
-        new Channel("#General")
+        new Channel("#General", "Have fun and talk!"),
     };
     ClientRegistry m_clientRegistry;
     CommandDispatcher m_commandDispatcher;

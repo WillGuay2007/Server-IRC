@@ -4,8 +4,8 @@
 
 void PartHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
 
-    if (params.size() < 2) {
-        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " PART " + ":Not enough parameters\n");
+    if (params.size() < 1) {
+        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " PART :Not enough parameters\n");
         return;
     }
 
@@ -26,16 +26,16 @@ void PartHandler::Handle(const std::vector<std::string>& params, BaseClient& cli
         if (foundChannel != nullptr) {
             if (foundChannel->HasMember(&clientToHandle)) {
                 foundChannel->RemoveMember(&clientToHandle);
-                foundChannel->NotifyMembers("Client: " + clientToHandle.GetNick() + " has left " + channelName + ". Reason: " + leaveReason + "\n");
+                foundChannel->NotifyMembers("The client: " + clientToHandle.GetNick() + " has left " + channelName + ". Reason: " + leaveReason + "\n", &clientToHandle);
                 clientToHandle.Send("Succesfully left channel: " + channelName + "\n");
                 continue;
             } else {
-                clientToHandle.Send(GeneratePrefix(ERR_NOTONCHANNEL) + clientToHandle.GetNick() + " Not a member on channel: " + channelName + "\n");
+                clientToHandle.Send(GeneratePrefix(ERR_NOTONCHANNEL) + clientToHandle.GetNick() + " " + channelName + " :You're not on that channel\n");
                 continue;
             }
            
         } else {
-            clientToHandle.Send(GeneratePrefix(ERR_NOSUCHCHANNEL) + clientToHandle.GetNick() + " Channel : " + channelName + " does not exist.\n");
+            clientToHandle.Send(GeneratePrefix(ERR_NOSUCHCHANNEL) + clientToHandle.GetNick() + " " + channelName + " :No such channel\n");
         }
     }
 
