@@ -19,6 +19,11 @@
 #include "PartHandler.h"
 #include "NamesHandler.h"
 #include "NoticeHandler.h"
+#include "QuitHandler.h"
+#include "OperHandler.h"
+#include "ListHandler.h"
+#include "AwayHandler.h"
+#include "WhoHandler.h"
 
 void Server::Start() {
     ServerSocket serverSocket(6667);
@@ -53,6 +58,11 @@ CommandDispatcher Server::CreateCommandDispatcher() {
         {"PART", new PartHandler(m_channelRegistry)},
         {"NAMES", new NamesHandler(m_channelRegistry)},
         {"NOTICE", new NoticeHandler(m_clientRegistry, m_channelRegistry)},
+        {"QUIT", new QuitHandler(m_clientRegistry)},
+        {"OPER", new OperHandler()},
+        {"LIST", new ListHandler(m_channelRegistry)},
+        {"AWAY", new AwayHandler()},
+        {"WHO", new WhoHandler(m_channelRegistry, m_clientRegistry)}
     };
 
     return CommandDispatcher(handlersMap);

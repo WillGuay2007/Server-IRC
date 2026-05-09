@@ -10,7 +10,7 @@ void PartHandler::Handle(const std::vector<std::string>& params, BaseClient& cli
     }
 
     std::string channelsString = params[0];
-    std::string leaveReason = params[1];
+    std::string leaveReason = params.size() > 1 ? params[1] : "Leaving";
     std::vector<std::string> channelStringsVector;
 
     size_t pos = 0;
@@ -26,8 +26,8 @@ void PartHandler::Handle(const std::vector<std::string>& params, BaseClient& cli
         if (foundChannel != nullptr) {
             if (foundChannel->HasMember(&clientToHandle)) {
                 foundChannel->RemoveMember(&clientToHandle);
-                foundChannel->NotifyMembers("The client: " + clientToHandle.GetNick() + " has left " + channelName + ". Reason: " + leaveReason + "\n", &clientToHandle);
-                clientToHandle.Send("Succesfully left channel: " + channelName + "\n");
+                foundChannel->NotifyMembers(":" + clientToHandle.GetNick() + "!" + clientToHandle.GetUsername() + " PART " + channelName + " :" + leaveReason + "\n", &clientToHandle);
+                clientToHandle.Send(":" + clientToHandle.GetNick() + "!" + clientToHandle.GetUsername() + " PART " + channelName + " :" + leaveReason + "\n");
                 continue;
             } else {
                 clientToHandle.Send(GeneratePrefix(ERR_NOTONCHANNEL) + clientToHandle.GetNick() + " " + channelName + " :You're not on that channel\n");

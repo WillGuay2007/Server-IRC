@@ -3,7 +3,6 @@
 #include "handler.h"
 
 class ChannelRegistry;
-class ClientRegistry;
 
 class NamesHandler : public Handler {
 public:

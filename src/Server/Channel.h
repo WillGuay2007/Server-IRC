@@ -13,7 +13,7 @@ public:
     std::string GetTopic() {return m_topic;}
     std::vector<BaseClient*> GetMembers() {return m_members;}
     bool HasMember(BaseClient* memberToCheck);
-    void AddMember(BaseClient* member) {m_members.push_back(member); std::cout << "Added member on channel " << m_name << std::endl;}
+    void AddMember(BaseClient* member) {m_members.push_back(member);}
     void RemoveMember(BaseClient* memberToRemove);
     void NotifyMembers(std::string message, BaseClient* clientWhoSent) {for (BaseClient* member : m_members) if (member != clientWhoSent) member->Send(message);}
 private:

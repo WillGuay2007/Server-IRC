@@ -9,4 +9,5 @@ public:
     void Send(const char* buffer, int buffersize);
     bool WaitForResponse(char* buffer, int buffersize);
     void Connect();
+    void Disconnect();
 };

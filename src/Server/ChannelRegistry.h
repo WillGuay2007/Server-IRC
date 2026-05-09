@@ -11,7 +11,6 @@ class ChannelRegistry {
 public:
     ChannelRegistry(std::initializer_list<Channel*> channelList) : m_channels(channelList) {}
     Channel* FindChannelByName(const std::string channelName);
-    void AddClientToChannel(BaseClient& clientToAdd, Channel* channel);
     std::vector<Channel*> GetChannels() { return m_channels; }
 private:
     std::vector<Channel*> m_channels;

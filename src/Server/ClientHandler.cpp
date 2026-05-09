@@ -36,9 +36,12 @@ void ClientHandler::Handle() {
             IrcMessage msg = IrcMessage::Parse(line);
 
             bool success = m_commandDispatcher.Dispatch(msg, m_client);
-            if (!success) m_client.Send("Command " + msg.GetCommand() + " not found.\n");
-
+            if (!success) m_client.Send(GeneratePrefix(ERR_UNKNOWNCOMMAND) + m_client.GetNick() + " " + msg.GetCommand() + " :Unknown command\n");
         }
+    }
+
+    for (Channel* channel : m_client.GetChannels()) {
+        channel->RemoveMember(&m_client);
     }
 
     std::cout << "Client disconnected\n";

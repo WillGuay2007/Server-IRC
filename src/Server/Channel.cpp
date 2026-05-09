@@ -4,6 +4,7 @@ void Channel::RemoveMember(BaseClient* memberToRemove) {
     for (auto it = m_members.begin(); it != m_members.end(); it++) {
         if (*it == memberToRemove) {
             m_members.erase(it);
+            memberToRemove->RemoveChannel(this);
             return;
         }
     }

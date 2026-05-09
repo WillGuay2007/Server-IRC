@@ -19,6 +19,7 @@ void PrivMsgHandler::Handle(const std::vector<std::string>& params, BaseClient& 
     std::vector<std::string> targetsVector;
 
     size_t pos = 0;
+    //Je vien de realiser que j'avais pas besoin de faire ca mais pg.
     while ((pos = targets.find(',')) != std::string::npos)
     {
         targetsVector.push_back(targets.substr(0, pos));
@@ -41,6 +42,9 @@ void PrivMsgHandler::Handle(const std::vector<std::string>& params, BaseClient& 
         }
 
         if (client != nullptr) {
+            if (client->GetAwayMessage() != "") {
+                clientToHandle.Send(GeneratePrefix(RPL_AWAY) + clientToHandle.GetNick() + " " + client->GetNick() + " :" + client->GetAwayMessage() + "\r\n");
+            }
             client->Send(":" + clientToHandle.GetNick() + " PRIVMSG " + target + " :" + messageToSend + "\n");
             continue;
         }

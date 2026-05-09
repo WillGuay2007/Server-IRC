@@ -14,6 +14,7 @@ public:
 
     bool Receive(char* buffer, int size);
     void Send(const std::string response) override;
+    void Disconnect();
 
 private:
     ClientSocket* m_socket;

@@ -29,3 +29,12 @@ bool BaseClient::AddChannel(Channel* channel) {
 bool BaseClient::operator==(const BaseClient& other) const {
     return other.GetNick() == GetNick();
 }
+
+void BaseClient::RemoveChannel(Channel* channel) {
+    for (auto it = m_channels.begin(); it != m_channels.end(); it++) {
+        if (*it == channel) {
+            m_channels.erase(it);
+            return;
+        }
+    }
+}
