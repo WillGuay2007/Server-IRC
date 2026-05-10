@@ -12,9 +12,11 @@ CommandDispatcher::~CommandDispatcher() {
     }
 }
 
-bool CommandDispatcher::Dispatch(const IrcMessage& msg) {
-    if (m_handlers.count(msg.GetCommand())) {
-        m_handlers[msg.GetCommand()]->Handle(msg.GetParams());
+bool CommandDispatcher::Dispatch(const IrcMessage& msg, BaseClient& clientToHandle) {
+    std::string command = msg.GetCommand();
+    if (m_handlers.count(command)) {
+        m_handlers[msg.GetCommand()]->Handle(msg.GetParams(), clientToHandle);
+        //std::cout << "Executing command: " + command + "\n";
         return true;
     } 
     return false;

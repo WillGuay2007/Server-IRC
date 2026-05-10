@@ -3,9 +3,8 @@
 #include "handler.h"
 #include <vector>
 
-class PingHandler : public Handler {
+class AwayHandler : public Handler {
     public:
-        ~PingHandler() = default;
+        ~AwayHandler() = default;
         void Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) override;
-    private:
 };

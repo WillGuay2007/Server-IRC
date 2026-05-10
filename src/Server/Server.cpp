@@ -10,6 +10,22 @@
 #include "UnitTest.h"
 #include "ClientHandler.h"
 
+#include "JoinHandler.h"
+#include "NickHandler.h"
+#include "UserHandler.h"
+#include "PingHandler.h"
+#include "MOTDHandler.h"
+#include "PrivMsgHandler.h"
+#include "PartHandler.h"
+#include "NamesHandler.h"
+#include "NoticeHandler.h"
+#include "QuitHandler.h"
+#include "OperHandler.h"
+#include "ListHandler.h"
+#include "AwayHandler.h"
+#include "WhoHandler.h"
+#include "TopicHandler.h"
+
 void Server::Start() {
     ServerSocket serverSocket(6667);
     serverSocket.StartListening();
@@ -19,15 +35,44 @@ void Server::Start() {
     while (true)
     {
         ClientSocket* clientSocket = serverSocket.WaitForConnection();
+        if (clientSocket == nullptr) continue;
+
+        if (m_clientRegistry.GetClients().size() >= m_maxNumberOfClients) {
+            clientSocket->Send("ERROR :Server is full\r\n", 30);
+            delete clientSocket;
+            continue;
+        }
+
         ServerClient* client = new ServerClient(clientSocket);
-        if (!client) continue;
         m_clientRegistry.Add(client);
         std::thread clientThread([client, this]() {
-            ClientHandler clientHandler = ClientHandler(*client, m_clientRegistry, m_channels);
+            ClientHandler clientHandler = ClientHandler(*client, m_commandDispatcher);
             clientHandler.Handle();
             m_clientRegistry.Remove(client);
             delete client;
         });
         clientThread.detach();
     }
+}
+
+CommandDispatcher Server::CreateCommandDispatcher() {
+     std::unordered_map<std::string, Handler*> handlersMap {
+        {"NICK", new NickHandler(m_clientRegistry)},
+        {"USER", new UserHandler()},
+        {"MOTD", new MOTDHandler()},
+        {"PING", new PingHandler()},
+        {"JOIN", new JoinHandler(m_channelRegistry)},
+        {"PRIVMSG", new PrivMsgHandler(m_clientRegistry, m_channelRegistry)},
+        {"PART", new PartHandler(m_channelRegistry)},
+        {"NAMES", new NamesHandler(m_channelRegistry)},
+        {"NOTICE", new NoticeHandler(m_clientRegistry, m_channelRegistry)},
+        {"QUIT", new QuitHandler(m_clientRegistry)},
+        {"OPER", new OperHandler()},
+        {"LIST", new ListHandler(m_channelRegistry)},
+        {"AWAY", new AwayHandler()},
+        {"WHO", new WhoHandler(m_channelRegistry, m_clientRegistry)},
+        {"TOPIC", new TopicHandler(m_channelRegistry)}
+    };
+
+    return CommandDispatcher(handlersMap);
 }

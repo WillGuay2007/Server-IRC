@@ -25,6 +25,7 @@ Socket::Socket(int port, char* ipAddress) {
 }
 
 Socket::Socket(void* windowSocket) {
+    Socket::s_winsockCount++;
     m_impl = new SocketImpl;
     m_impl->socket = *(SOCKET*)windowSocket;
     //Pas besoin de mettre l'adresse ici puisque le socket la contient deja.

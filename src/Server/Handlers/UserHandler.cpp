@@ -1,27 +1,27 @@
 #include "UserHandler.h"
 #include "ServerClient.h"
 
-void UserHandler::Handle(const std::vector<std::string>& params) {
-    if (params.empty() || params.size() < 4) {
-        client.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n");
+void UserHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
+    if (params.size() < 4) {
+        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " USER " + ":Not enough parameters\r\n");
         return;
     }
-    if (client.GetRealName() != "*" || client.GetUsername() != "*") {
-        client.Send(GeneratePrefix(ERR_ALREADYREGISTERED) + client.GetNick() + " USER " + ":You may not re-register.\n");
+    if (clientToHandle.GetRealName() != "*" || clientToHandle.GetUsername() != "*") {
+        clientToHandle.Send(GeneratePrefix(ERR_ALREADYREGISTERED) + clientToHandle.GetNick() + " USER " + ":You may not re-register.\r\n");
         return;
     }
     std::string username = params[0];
     std::string realName = params[3];
     if (realName.empty() || username.empty()) {
-        client.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + client.GetNick() + " USER " + ":Not enough parameters\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " USER " + ":Not enough parameters\r\n");
         return;
     }
-    client.SetUsername(username);
-    client.SetRealName(realName);
-    if (client.CheckIfIsRegistered()) {
-        client.Send(GeneratePrefix(RPL_WELCOME) + client.GetNick() + " :Welcome to " + SERVER_NAME + "!\n");
-        return;
+
+    if (clientToHandle.HasNickAndUser()){
+        clientToHandle.Send(GeneratePrefix(ERR_ALREADYREGISTERED) + "you already registered.\r\n");
     } else {
-        client.Send("Succesfully set your USER. Please set your NICK now.\n");
+        clientToHandle.SetUsername(username);
+        clientToHandle.SetRealName(realName);
+        if (clientToHandle.CanRegister()) clientToHandle.Register();
     }
 }

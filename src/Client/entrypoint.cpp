@@ -1,7 +1,6 @@
 #include "entrypoint.h"
 #include "ClientSocket.h"
 #include "clientIRC.h"
-#include "Winsock2Init.h"
 #include <string>
 #include <iostream>
 #include "raylib.h"
@@ -27,7 +26,6 @@ void NetworkLoop(ClientSocket* client, ClientIRC* irc, std::atomic<bool>& runnin
 void client_start()
 {
     std::atomic<bool> running(true);
-    InitWinsock2();
 
     ClientSocket client(6667);
     client.Connect();

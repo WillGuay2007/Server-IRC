@@ -1,11 +1,11 @@
 #include "MOTDHandler.h"
 #include "ServerClient.h"
 
-void MOTDHandler::Handle(const std::vector<std::string>& params) {
+void MOTDHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
     if (!MOTD.empty()) {
-        client.Send(MOTD);
+        clientToHandle.Send(MOTD);
         return;
     } else {
-        client.Send(GeneratePrefix(ERR_NOMOTD) + ":The server does not have a message of the day.\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NOMOTD) + ":The server does not have a message of the day.\r\n");
     }
 }

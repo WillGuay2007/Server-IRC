@@ -12,10 +12,6 @@
 #include "PingHandler.h"
 #include "MOTDHandler.h"
 
-ClientHandler::~ClientHandler() {
-    delete m_commandDispatcher;
-}
-
 void ClientHandler::Handle() {
     std::cout << "Client connected\n";
 
@@ -23,10 +19,7 @@ void ClientHandler::Handle() {
 
     while (true)
     {
-        if (!m_client.Receive(buffer, sizeof(buffer)))
-        {
-            break; //Déconnecter le client si ca fail.
-        }
+        if (!m_client.Receive(buffer, sizeof(buffer))) break;
 
         std::string clientResponse(buffer);
 
@@ -34,27 +27,22 @@ void ClientHandler::Handle() {
         while ((pos = clientResponse.find("\r\n")) != std::string::npos)
         {
             std::string line = clientResponse.substr(0, pos);
+
+            //Pour le debug, mettre en commentaire si on utilise pas.
+            //std::cout << line << std::endl;
+
             clientResponse.erase(0, pos + 2);
 
             IrcMessage msg = IrcMessage::Parse(line);
 
-            bool success = m_commandDispatcher->Dispatch(msg);
-            if (!success) m_client.Send("Command " + msg.GetCommand() + " not found.\n");
-
+            bool success = m_commandDispatcher.Dispatch(msg, m_client);
+            if (!success) m_client.Send(GeneratePrefix(ERR_UNKNOWNCOMMAND) + m_client.GetNick() + " " + msg.GetCommand() + " :Unknown command\n");
         }
     }
 
+    for (Channel* channel : m_client.GetChannels()) {
+        channel->RemoveMember(&m_client);
+    }
+
     std::cout << "Client disconnected\n";
-}
-
-void ClientHandler::InitCommandDispatcher() {
-    std::unordered_map<std::string, Handler*> handlersMap {
-        {"NICK", new NickHandler(m_client, m_registry)},
-        {"USER", new UserHandler(m_client)},
-        {"MOTD", new MOTDHandler(m_client)},
-        {"PING", new PingHandler(m_client)},
-        {"JOIN", new JoinHandler(m_client, m_channels)},
-    };
-
-    m_commandDispatcher = new CommandDispatcher(handlersMap);
 }

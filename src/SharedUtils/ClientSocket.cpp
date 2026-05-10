@@ -35,3 +35,7 @@ bool ClientSocket::WaitForResponse(char* buffer, int buffersize) {
     buffer[received] = 0;
     return true;
 }
+
+void ClientSocket::Disconnect() {
+    closesocket(*(SOCKET*)GetWindowSocket());
+}

@@ -1,17 +1,24 @@
+#pragma once
+
 #include <string>
 #include "BaseClient.h"
 #include <vector>
 #include <iostream>
-#pragma once
 
 class Channel {
 public:
-    Channel(std::string channelName) : m_name(channelName){}
+    Channel(std::string channelName, std::string topic = "") : m_name(channelName), m_topic(topic) {}
     std::string GetName() {return m_name;}
+    std::string GetNicksForNamReply();
+    std::string GetTopic() {return m_topic;}
     std::vector<BaseClient*> GetMembers() {return m_members;}
-    void AddMember(BaseClient* member) {m_members.push_back(member); std::cout << "Added member on channel " << m_name << std::endl;}
-    void NotifyMembers(std::string message);
+    bool HasMember(BaseClient* memberToCheck);
+    void AddMember(BaseClient* member) {m_members.push_back(member);}
+    void RemoveMember(BaseClient* memberToRemove);
+    void NotifyMembers(std::string message, BaseClient* clientWhoSent) {for (BaseClient* member : m_members) if (member != clientWhoSent) member->Send(message);}
+    void SetTopic(std::string topic) { m_topic = topic;}
 private:
+    std::string m_topic;
     std::string m_name;
     std::vector<BaseClient*> m_members;
 };

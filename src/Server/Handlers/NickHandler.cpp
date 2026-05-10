@@ -1,22 +1,20 @@
 #include "NickHandler.h"
 #include "ServerClient.h"
 
-void NickHandler::Handle(const std::vector<std::string>& params) {
+void NickHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
     if (params.empty()) {
-        client.Send(GeneratePrefix(ERR_NONICKNAMEGIVEN) + ":No nickname given\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NONICKNAMEGIVEN) + ":No nickname given\r\n");
         return;
     }
     std::string chosenNick = params[0];
     if (m_clients.FindClientByNick(chosenNick)) {
-        client.Send(GeneratePrefix(ERR_NICKNAMEINUSE) + client.GetNick() + " " + chosenNick + " :Nickname is already in use.\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NICKNAMEINUSE) + clientToHandle.GetNick() + " " + chosenNick + " :Nickname is already in use.\r\n");
         return;
     }
     
-    client.SetNick(chosenNick);
-    if (client.CheckIfIsRegistered()) {
-        client.Send(GeneratePrefix(RPL_WELCOME) + client.GetNick() + " :Welcome to " + SERVER_NAME + "!\n");
+    clientToHandle.SetNick(chosenNick);
+    if (clientToHandle.CanRegister()) {
+        clientToHandle.Register();
         return;
-    } else {
-        client.Send("Succesfully set your NICK. Please set your USER now.\n");
     }
 }
