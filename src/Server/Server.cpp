@@ -24,6 +24,7 @@
 #include "ListHandler.h"
 #include "AwayHandler.h"
 #include "WhoHandler.h"
+#include "TopicHandler.h"
 
 void Server::Start() {
     ServerSocket serverSocket(6667);
@@ -35,6 +36,13 @@ void Server::Start() {
     {
         ClientSocket* clientSocket = serverSocket.WaitForConnection();
         if (clientSocket == nullptr) continue;
+
+        if (m_clientRegistry.GetClients().size() >= m_maxNumberOfClients) {
+            clientSocket->Send("ERROR :Server is full\r\n", 30);
+            delete clientSocket;
+            continue;
+        }
+
         ServerClient* client = new ServerClient(clientSocket);
         m_clientRegistry.Add(client);
         std::thread clientThread([client, this]() {
@@ -62,7 +70,8 @@ CommandDispatcher Server::CreateCommandDispatcher() {
         {"OPER", new OperHandler()},
         {"LIST", new ListHandler(m_channelRegistry)},
         {"AWAY", new AwayHandler()},
-        {"WHO", new WhoHandler(m_channelRegistry, m_clientRegistry)}
+        {"WHO", new WhoHandler(m_channelRegistry, m_clientRegistry)},
+        {"TOPIC", new TopicHandler(m_channelRegistry)}
     };
 
     return CommandDispatcher(handlersMap);

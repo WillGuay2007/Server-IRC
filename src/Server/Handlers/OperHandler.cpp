@@ -2,7 +2,7 @@
 
 void OperHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
    if (params.size() < 2) {
-        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " OPER :Not enough parameters\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " OPER :Not enough parameters\r\n");
         return;
     } 
 

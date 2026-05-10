@@ -8,9 +8,9 @@ void QuitHandler::Handle(const std::vector<std::string>& params, BaseClient& cli
     ServerClient* serverClient = dynamic_cast<ServerClient*>(&clientToHandle);
     if (serverClient != nullptr) {
     std::string reason = params.empty() ? "Client Quit" : params[0];
-    clientToHandle.Send(clientToHandle.GetNick() + " ERROR :Closing Link: " + reason + "\n");
+    clientToHandle.Send(clientToHandle.GetNick() + " ERROR :Closing Link: " + reason + "\r\n");
         for (Channel* channel : clientToHandle.GetChannels()) {
-            channel->NotifyMembers(":" + clientToHandle.GetNick() + "!" + clientToHandle.GetUsername() + "@host QUIT :" + reason + "\n", &clientToHandle);
+            channel->NotifyMembers(":" + clientToHandle.GetNick() + "!" + clientToHandle.GetUsername() + "@host QUIT :" + reason + "\r\n", &clientToHandle);
         }
         m_clientRegistry.Remove(&clientToHandle);
         serverClient->Disconnect();

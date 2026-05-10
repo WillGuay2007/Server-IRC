@@ -16,6 +16,7 @@ public:
     void AddMember(BaseClient* member) {m_members.push_back(member);}
     void RemoveMember(BaseClient* memberToRemove);
     void NotifyMembers(std::string message, BaseClient* clientWhoSent) {for (BaseClient* member : m_members) if (member != clientWhoSent) member->Send(message);}
+    void SetTopic(std::string topic) { m_topic = topic;}
 private:
     std::string m_topic;
     std::string m_name;

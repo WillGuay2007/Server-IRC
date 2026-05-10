@@ -2,6 +2,7 @@
 #include "ServerClient.h"
 #include "Channel.h"
 
+//C'etais pas marqué dans la grille de sauvegarder les conversations.
 void JoinHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
     if (params.empty()) {
         clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " JOIN " + ":Not enough parameters\r\n");

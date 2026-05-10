@@ -7,7 +7,7 @@
 
 //Je les forward declare
 void CompileDir(Cmd *cmd, const char* dir);
-void build_server(void);
+void build_server(File_Paths* o_files);
 void build_client(File_Paths* o_files);
 
 void addSharedSources(Cmd *cmd) {
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
         build_client(&o_files);
     }
     else if (strcmp(argv[1], "server") == 0) {
-        build_server();
+        build_server(&o_files);
     }
     else {
         printf("Unknown target: %s\n", argv[1]);
@@ -51,8 +51,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-// #define nob_cc(cmd) nob_cmd_append(cmd, "./Tools/w64devkit/bin/c++.exe")
-void build_server(void)
+void build_server(File_Paths* o_files)
 {
     Cmd cmd = {0};
     
@@ -66,14 +65,21 @@ void build_server(void)
     CompileDir(&cmd, "src/Server/");
     CompileDir(&cmd, "src/Server/Handlers/");
     
+   for (int i = 0; i < o_files->count; ++i) {
+        cmd_append(&cmd, o_files->items[i]);
+    } 
+
     addSharedSources(&cmd);
     
     nob_cc_output(&cmd, "./Deployment/server.exe");
     
     addSharedLibs(&cmd);
     
+    cmd_append(&cmd, RAYLIB_INCLUDES);
+    cmd_append(&cmd, RLIMGUI_INCLUDES);
+    cmd_append(&cmd, RAYLIB_LFLAGS);
     cmd_append(&cmd, RLIMGUI_LFLAGS);
-    
+
     if (!cmd_run_sync_and_reset(&cmd)) exit(1);
 }
 

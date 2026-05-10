@@ -7,8 +7,8 @@ void NamesHandler::Handle(const std::vector<std::string>& params, BaseClient& cl
     if (params.size() < 1) {
         for (Channel* channel : m_channelRegistry.GetChannels()) {
             std::string nicks = channel->GetNicksForNamReply();
-            clientToHandle.Send(GeneratePrefix(RPL_NAMREPLY) + clientToHandle.GetNick() + " = " + channel->GetName() + " :" + nicks + "\n");
-            clientToHandle.Send(GeneratePrefix(RPL_ENDOFNAMES) + clientToHandle.GetNick() + " = " + channel->GetName() + " :End of NAMES list\n");
+            clientToHandle.Send(GeneratePrefix(RPL_NAMREPLY) + clientToHandle.GetNick() + " = " + channel->GetName() + " :" + nicks + "\r\n");
+            clientToHandle.Send(GeneratePrefix(RPL_ENDOFNAMES) + clientToHandle.GetNick() + " = " + channel->GetName() + " :End of NAMES list\r\n");
         }
         return;
     }
@@ -28,8 +28,8 @@ void NamesHandler::Handle(const std::vector<std::string>& params, BaseClient& cl
         Channel* foundChanel = m_channelRegistry.FindChannelByName(channelName);
         if (foundChanel != nullptr) {
             std::string nicks = foundChanel->GetNicksForNamReply();
-            clientToHandle.Send(GeneratePrefix(RPL_NAMREPLY) + clientToHandle.GetNick() + " = " + foundChanel->GetName() + " :" + nicks + "\n");
-            clientToHandle.Send(GeneratePrefix(RPL_ENDOFNAMES) + clientToHandle.GetNick() + " " + foundChanel->GetName() + " :End of NAMES list\n");
+            clientToHandle.Send(GeneratePrefix(RPL_NAMREPLY) + clientToHandle.GetNick() + " = " + foundChanel->GetName() + " :" + nicks + "\r\n");
+            clientToHandle.Send(GeneratePrefix(RPL_ENDOFNAMES) + clientToHandle.GetNick() + " " + foundChanel->GetName() + " :End of NAMES list\r\n");
         }
     }
 

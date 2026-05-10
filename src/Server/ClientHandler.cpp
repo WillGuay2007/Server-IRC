@@ -29,7 +29,7 @@ void ClientHandler::Handle() {
             std::string line = clientResponse.substr(0, pos);
 
             //Pour le debug, mettre en commentaire si on utilise pas.
-            std::cout << line << std::endl;
+            //std::cout << line << std::endl;
 
             clientResponse.erase(0, pos + 2);
 

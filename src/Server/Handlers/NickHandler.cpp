@@ -3,17 +3,16 @@
 
 void NickHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
     if (params.empty()) {
-        clientToHandle.Send(GeneratePrefix(ERR_NONICKNAMEGIVEN) + ":No nickname given\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NONICKNAMEGIVEN) + ":No nickname given\r\n");
         return;
     }
     std::string chosenNick = params[0];
     if (m_clients.FindClientByNick(chosenNick)) {
-        clientToHandle.Send(GeneratePrefix(ERR_NICKNAMEINUSE) + clientToHandle.GetNick() + " " + chosenNick + " :Nickname is already in use.\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NICKNAMEINUSE) + clientToHandle.GetNick() + " " + chosenNick + " :Nickname is already in use.\r\n");
         return;
     }
     
     clientToHandle.SetNick(chosenNick);
-    clientToHandle.Send("Succesfully set your nick to: " + clientToHandle.GetNick() + "\n");
     if (clientToHandle.CanRegister()) {
         clientToHandle.Register();
         return;

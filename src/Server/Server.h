@@ -9,6 +9,11 @@ class Server {
 public:
     Server() : m_commandDispatcher(CreateCommandDispatcher()) {}
     void Start();
+    ChannelRegistry& GetChannelRegistry() { return m_channelRegistry; }
+    ClientRegistry& GetClientRegistry() { return m_clientRegistry; }
+    int GetClientCount() { return m_clientRegistry.GetClients().size(); }
+    int GetMaxClientCount() { return m_maxNumberOfClients; }
+    void SetMaxNumberOfClients(int newNumber) { m_maxNumberOfClients = newNumber;}
 private:
     CommandDispatcher CreateCommandDispatcher();
     ChannelRegistry m_channelRegistry {
@@ -17,4 +22,5 @@ private:
     };
     ClientRegistry m_clientRegistry;
     CommandDispatcher m_commandDispatcher;
+    int m_maxNumberOfClients = 25;
 };

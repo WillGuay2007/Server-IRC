@@ -5,7 +5,7 @@
 void PartHandler::Handle(const std::vector<std::string>& params, BaseClient& clientToHandle) {
 
     if (params.size() < 1) {
-        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " PART :Not enough parameters\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " PART :Not enough parameters\r\n");
         return;
     }
 
@@ -26,16 +26,16 @@ void PartHandler::Handle(const std::vector<std::string>& params, BaseClient& cli
         if (foundChannel != nullptr) {
             if (foundChannel->HasMember(&clientToHandle)) {
                 foundChannel->RemoveMember(&clientToHandle);
-                foundChannel->NotifyMembers(":" + clientToHandle.GetNick() + "!" + clientToHandle.GetUsername() + " PART " + channelName + " :" + leaveReason + "\n", &clientToHandle);
-                clientToHandle.Send(":" + clientToHandle.GetNick() + "!" + clientToHandle.GetUsername() + " PART " + channelName + " :" + leaveReason + "\n");
+                foundChannel->NotifyMembers(":" + clientToHandle.GetNick() + "!" + clientToHandle.GetUsername() + " PART " + channelName + " :" + leaveReason + "\r\n", &clientToHandle);
+                clientToHandle.Send(":" + clientToHandle.GetNick() + "!" + clientToHandle.GetUsername() + " PART " + channelName + " :" + leaveReason + "\r\n");
                 continue;
             } else {
-                clientToHandle.Send(GeneratePrefix(ERR_NOTONCHANNEL) + clientToHandle.GetNick() + " " + channelName + " :You're not on that channel\n");
+                clientToHandle.Send(GeneratePrefix(ERR_NOTONCHANNEL) + clientToHandle.GetNick() + " " + channelName + " :You're not on that channel\r\n");
                 continue;
             }
            
         } else {
-            clientToHandle.Send(GeneratePrefix(ERR_NOSUCHCHANNEL) + clientToHandle.GetNick() + " " + channelName + " :No such channel\n");
+            clientToHandle.Send(GeneratePrefix(ERR_NOSUCHCHANNEL) + clientToHandle.GetNick() + " " + channelName + " :No such channel\r\n");
         }
     }
 

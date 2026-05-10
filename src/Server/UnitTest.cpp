@@ -14,6 +14,9 @@
 #include "PartHandler.h"
 #include "PrivMsgHandler.h"
 #include "NamesHandler.h"
+#include "TopicHandler.h"
+#include "ListHandler.h"
+#include "OperHandler.h"
 #include "ChannelRegistry.h"
 #include "Channel.h"
 
@@ -38,10 +41,10 @@ void TestPing() {
     PingHandler handler;
 
     handler.Handle({}, client);
-    TEST(client.GetLastSentResponse() == "PONG\n");
+    TEST(client.GetLastSentResponse() == "PONG\r\n");
 
     handler.Handle({"Bruh"}, client);
-    TEST(client.GetLastSentResponse() == "PONG Bruh\n");
+    TEST(client.GetLastSentResponse() == "PONG Bruh\r\n");
 }
 
 void TestMOTD() {
@@ -131,6 +134,57 @@ void TestPrivMsg() {
     TEST(sender.GetLastSentResponse().find("401") != std::string::npos);
 }
 
+void TestTopic() {
+    MockClient client;
+    client.SetNick("willb");
+    Channel general("#General", "");
+    ChannelRegistry registry{&general};
+    TopicHandler handler(registry);
+
+    handler.Handle({}, client);
+    TEST(client.GetLastSentResponse().find("461") != std::string::npos);
+
+    general.AddMember(&client);
+    handler.Handle({"#General"}, client);
+    TEST(client.GetLastSentResponse().find("331") != std::string::npos);
+
+    handler.Handle({"#General", "New topic!"}, client);
+    TEST(general.GetTopic() == "New topic!");
+    TEST(client.GetLastSentResponse().find("332") != std::string::npos);
+
+    MockClient sigmaHacker;
+    sigmaHacker.SetNick("sigmaHacker");
+    handler.Handle({"#General", "Hack!"}, sigmaHacker);
+    TEST(sigmaHacker.GetLastSentResponse().find("442") != std::string::npos);
+}
+
+void TestList() {
+    MockClient client;
+    client.SetNick("willb");
+    Channel general("#General", "Fun!");
+    ChannelRegistry registry{&general};
+    ListHandler handler(registry);
+
+    handler.Handle({}, client);
+    TEST(client.GetLastSentResponse().find("323") != std::string::npos);
+}
+
+void TestOper() {
+    MockClient client;
+    client.SetNick("willb");
+    OperHandler handler;
+
+    handler.Handle({}, client);
+    TEST(client.GetLastSentResponse().find("461") != std::string::npos);
+
+    handler.Handle({"admin", "wiufgheifgwifhewifuhwefhweifweheiwufehwiewfuiew"}, client);
+    TEST(client.GetLastSentResponse().find("464") != std::string::npos);
+    TEST(!client.IsOper());
+
+    handler.Handle({OPER_NAME, OPER_PASSWORD}, client);
+    TEST(client.IsOper());
+}
+
 void RunAllTests() {
     TestNick();
     TestPing();
@@ -140,4 +194,7 @@ void RunAllTests() {
     TestJoin();
     TestPart();
     TestPrivMsg();
+    TestTopic();
+    TestList();
+    TestOper();
 }

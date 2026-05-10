@@ -12,10 +12,10 @@ bool BaseClient::CanRegister() {
 
 void BaseClient::Register() {
     m_hasRegisteredOnce = true;
-    Send(GeneratePrefix(RPL_WELCOME) + GetNick() + " :Welcome to the " + SERVER_NAME + " Network, " + GetNick() + "!\n");
-    Send(GeneratePrefix(RPL_YOURHOST) + GetNick() + " :Your host is " + SERVER_NAME + " running version " + SERVER_VERSION + "\n");
-    Send(GeneratePrefix(RPL_CREATED) + GetNick() + " :This server was created on " + SERVER_START_TIME + "\n");
-    Send(GeneratePrefix(RPL_MYINFO) + GetNick() + " " + SERVER_NAME + " " + SERVER_VERSION + "\n");
+    Send(GeneratePrefix(RPL_WELCOME) + GetNick() + " :Welcome to the " + SERVER_NAME + " Network, " + GetNick() + "!\r\n");
+    Send(GeneratePrefix(RPL_YOURHOST) + GetNick() + " :Your host is " + SERVER_NAME + " running version " + SERVER_VERSION + "\r\n");
+    Send(GeneratePrefix(RPL_CREATED) + GetNick() + " :This server was created on " + SERVER_START_TIME + "\r\n");
+    Send(GeneratePrefix(RPL_MYINFO) + GetNick() + " " + SERVER_NAME + " " + SERVER_VERSION + "\r\n");
 }
 
 bool BaseClient::AddChannel(Channel* channel) {

@@ -10,7 +10,7 @@ void NoticeHandler::Handle(const std::vector<std::string>& params, BaseClient& c
     }
 
     if (params.size() < 2) {
-        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " NOTICE " + ":Not enough parameters\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " NOTICE " + ":Not enough parameters\r\n");
         return;
     }
 
@@ -32,17 +32,17 @@ void NoticeHandler::Handle(const std::vector<std::string>& params, BaseClient& c
         
         if (channel != nullptr) {
             if (channel->HasMember(&clientToHandle)) {
-                channel->NotifyMembers(":" + clientToHandle.GetNick() + " NOTICE " + target + " :" + messageToSend + "\n", &clientToHandle);
+                channel->NotifyMembers(":" + clientToHandle.GetNick() + " NOTICE " + target + " :" + messageToSend + "\r\n", &clientToHandle);
             }
             continue;
         }
 
         if (client != nullptr) {
-            client->Send(":" + clientToHandle.GetNick() + " NOTICE " + target + " :" + messageToSend + "\n");
+            client->Send(":" + clientToHandle.GetNick() + " NOTICE " + target + " :" + messageToSend + "\r\n");
             continue;
         }
 
-        clientToHandle.Send(GeneratePrefix(ERR_NOSUCHNICK) + clientToHandle.GetNick() + " " + target + " :There was no such nickname.\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NOSUCHNICK) + clientToHandle.GetNick() + " " + target + " :There was no such nickname.\r\n");
         
     }
 

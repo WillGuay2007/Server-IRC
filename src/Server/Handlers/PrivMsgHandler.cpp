@@ -5,12 +5,16 @@ void PrivMsgHandler::Handle(const std::vector<std::string>& params, BaseClient& 
 
     if (clientToHandle.HasNickAndUser() == false) {
         //Le critere 8 de la grille si j'ai bien compris
-        clientToHandle.Send(GeneratePrefix(ERR_NOTREGISTERED) + " " + clientToHandle.GetNick() + " Must register first with USER and NICK before sending any message.");
+        clientToHandle.Send(GeneratePrefix(ERR_NOTREGISTERED) + " " + clientToHandle.GetNick() + " :Must register first with USER and NICK before sending any message.");
         return;
     }
 
-    if (params.size() < 2) {
-        clientToHandle.Send(GeneratePrefix(ERR_NEEDMOREPARAMS) + clientToHandle.GetNick() + " PRIVMSG " + ":Not enough parameters\n");
+   if (params.empty()) {
+    clientToHandle.Send(GeneratePrefix(ERR_NORECIPIENT) + clientToHandle.GetNick() + " :No recipient given (PRIVMSG)\r\n");
+    return;
+    }
+    if (params.size() < 2 || params[1].empty()) {
+        clientToHandle.Send(GeneratePrefix(ERR_NOTEXTTOSEND) + clientToHandle.GetNick() + " :No text to send\r\n");
         return;
     }
 
@@ -33,10 +37,10 @@ void PrivMsgHandler::Handle(const std::vector<std::string>& params, BaseClient& 
         
         if (channel != nullptr) {
             if (channel->HasMember(&clientToHandle)) {
-                channel->NotifyMembers(":" + clientToHandle.GetNick() + " PRIVMSG " + target + " :" + messageToSend + "\n", &clientToHandle);
+                channel->NotifyMembers(":" + clientToHandle.GetNick() + " PRIVMSG " + target + " :" + messageToSend + "\r\n", &clientToHandle);
             }
             else {
-                clientToHandle.Send(GeneratePrefix(ERR_CANNOTSENDTOCHAN) + clientToHandle.GetNick() + " " + channel->GetName() + " :Cannot send to channel.\n");
+                clientToHandle.Send(GeneratePrefix(ERR_CANNOTSENDTOCHAN) + clientToHandle.GetNick() + " " + channel->GetName() + " :Cannot send to channel.\r\n");
             }
             continue;
         }
@@ -45,11 +49,11 @@ void PrivMsgHandler::Handle(const std::vector<std::string>& params, BaseClient& 
             if (client->GetAwayMessage() != "") {
                 clientToHandle.Send(GeneratePrefix(RPL_AWAY) + clientToHandle.GetNick() + " " + client->GetNick() + " :" + client->GetAwayMessage() + "\r\n");
             }
-            client->Send(":" + clientToHandle.GetNick() + " PRIVMSG " + target + " :" + messageToSend + "\n");
+            client->Send(":" + clientToHandle.GetNick() + " PRIVMSG " + target + " :" + messageToSend + "\r\n");
             continue;
         }
 
-        clientToHandle.Send(GeneratePrefix(ERR_NOSUCHNICK) + clientToHandle.GetNick() + " " + target + " :There was no such nickname.\n");
+        clientToHandle.Send(GeneratePrefix(ERR_NOSUCHNICK) + clientToHandle.GetNick() + " " + target + " :There was no such nickname.\r\n");
         
     }
 

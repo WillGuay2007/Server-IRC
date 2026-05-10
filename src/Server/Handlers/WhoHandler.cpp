@@ -29,5 +29,5 @@ void WhoHandler::SendWhoReply(BaseClient *clientInfo, BaseClient &receiver, Chan
     std::string flags = clientInfo->GetAwayMessage().empty() ? "H" : "G";
     if (clientInfo->IsOper()) flags += "*";
     std::string channelName = channel ? channel->GetName() : "*";
-    receiver.Send(GeneratePrefix(RPL_WHOREPLY) + channelName + " " + clientInfo->GetUsername() + " test host " + SERVER_NAME + " " + clientInfo->GetNick() + " " + flags + " 0 " + " :" + clientInfo->GetRealName() + "\r\n");
+    receiver.Send(GeneratePrefix(RPL_WHOREPLY) + receiver.GetNick() + channelName + " " + clientInfo->GetUsername() + " test host " + SERVER_NAME + " " + clientInfo->GetNick() + " " + flags + " 0 " + " :" + clientInfo->GetRealName() + "\r\n");
 }
