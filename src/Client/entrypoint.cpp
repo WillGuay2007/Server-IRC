@@ -1,99 +1,85 @@
 #include "entrypoint.h"
 #include "ClientSocket.h"
 #include "clientIRC.h"
-#include "Winsock2Init.h"
-#include <string>
 #include <iostream>
-#include <vector>
-#include "raylib.h"
-#include "rlImGui.h"
-#include "imgui.h"
+#include <thread>
+#include <atomic>
+#include "ClientUI.h"
 
-void client_start()
+void NetworkLoop(ClientSocket* client, ClientIRC* irc, std::atomic<bool>& running)
 {
-    InitWinsock2();
-
-    ClientSocket client(6667);
-    client.Connect();
-
-    std::string nickname = "Guest";
-
-    std::string login = "NICK " + nickname + "\r\nUSER " + nickname + "0 * :" + nickname + "\r\n";
-    client.Send(login.c_str(), (int)login.size());
-
-    std::string join = "JOIN #chat\r\n";
-    client.Send(join.c_str(), (int)join.size());
-
-    InitWindow(800, 800, "Client interface");
-    SetTargetFPS(60);
-    rlImGuiSetup(true);
-
-    char inputBuffer[512] = {};
-    char recvBuffer[512] = {};
-
-    std::vector<std::string> messages;
-
-    while (!WindowShouldClose())
+    char buffer[512];
+    std::string pending;
+    
+    while (running)
     {
-
-        if (client.WaitForResponse(recvBuffer, sizeof(recvBuffer)))
+        memset(buffer, 0, sizeof(buffer));
+        if (client->WaitForResponse(buffer, sizeof(buffer)))
         {
-            std::string ircMessage = recvBuffer;
-            HandleIRCMessage(ircMessage, &client, messages, nickname);
-        }
+            pending += buffer;
 
-        BeginDrawing();
-        ClearBackground(DARKGRAY);
-
-        rlImGuiBegin();
-
-        ImGui::Begin("Client Chat");
-
-        ImGui::BeginChild("ChatHistory", ImVec2(0, 500), true);
-
-        for (const std::string& msg : messages)
+        size_t pos;
+        while ((pos = pending.find("\r\n")) != std::string::npos)
         {
-            ImGui::TextWrapped("%s", msg.c_str());
+            std::string line = pending.substr(0, pos);
+            pending.erase(0, pos + 2);
+
+            irc->HandleIRCMessage(line);
         }
-
-        ImGui::EndChild();
-
-        if (ImGui::InputText("Message", inputBuffer, sizeof(inputBuffer),
-            ImGuiInputTextFlags_EnterReturnsTrue))
-        {
-            if (strlen(inputBuffer) > 0)
-            {
-                std::string msg = "PRIVMSG #chat :" + std::string(inputBuffer) + "\r\n";
-
-                client.Send(msg.c_str(), (int)msg.size());
-
-                messages.push_back("You: " + std::string(inputBuffer));
-
-                inputBuffer[0] = '\0';
-            }
         }
+    }
+}
 
-        if (ImGui::Button("Send"))
-        {
-            if (strlen(inputBuffer) > 0)
-            {
-                std::string msg = "PRIVMSG #chat :" + std::string(inputBuffer) + "\r\n";
+void client_start(const std::string& address)
+{
+    std::atomic<bool> running(true);
 
-                client.Send(msg.c_str(), (int)msg.size());
+    std::string ip = "127.0.0.1";
+    int port = 6667;
 
-                messages.push_back("You: " + std::string(inputBuffer));
+    std::string parsedAddress = address;
 
-                inputBuffer[0] = '\0';
-            }
-        }
-
-        ImGui::End();
-
-        rlImGuiEnd();
-        EndDrawing();
+    if (parsedAddress.rfind("irc://", 0) == 0)
+    {
+        parsedAddress = parsedAddress.substr(6);
     }
 
-    rlImGuiShutdown();
-    CloseWindow();
-    DeInitWinsock2();
+    size_t colon = parsedAddress.find(':');
+
+    if (colon != std::string::npos)
+    {
+        ip = parsedAddress.substr(0, colon);
+        port = std::stoi(parsedAddress.substr(colon + 1));
+    }
+    else
+    {
+        ip = parsedAddress;
+    }
+
+    ClientSocket client(port, (char*)ip.c_str());
+    client.Connect();
+
+    ClientIRC irc(&client);
+    
+    std::string nickname = "Guest";
+    std::string login = "NICK " + nickname + "\r\nUSER " + nickname + " 0 * :" + nickname + "\r\n";
+    client.Send(login.c_str(), (int)login.size());
+    
+    client.Send("JOIN #chat\r\n", 12);
+    
+    std::thread netThread(NetworkLoop, &client, &irc, std::ref(running));
+
+    ClientUI ui(&irc, &client);
+    ui.Init();
+
+    while (!ui.ShouldClose())
+    {
+        ui.Update();
+        ui.Draw();
+    }
+
+    running = false;
+    netThread.join();
+
+    ui.Shutdown();
 }
